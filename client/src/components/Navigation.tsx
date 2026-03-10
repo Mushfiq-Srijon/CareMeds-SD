@@ -24,12 +24,13 @@ export default function Navigation() {
   return (
     <nav className="custom-navbar">
       <div className="custom-navbar-container">
-        {/* Website Name */}
+
+        {/* Brand */}
         <Link to="/home" className="custom-navbar-brand">
-          CareMeds
+          Care<span>Meds</span>
         </Link>
 
-        {/* Hamburger Menu for Mobile */}
+        {/* Hamburger */}
         <button
           className="custom-navbar-toggler"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -40,7 +41,7 @@ export default function Navigation() {
           <span className="custom-navbar-toggler-icon"></span>
         </button>
 
-        {/* Navigation Links */}
+        {/* Links */}
         <div className={`custom-navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           {navItems.map((item) => (
             <Link
@@ -53,6 +54,7 @@ export default function Navigation() {
             </Link>
           ))}
         </div>
+
       </div>
     </nav>
   );

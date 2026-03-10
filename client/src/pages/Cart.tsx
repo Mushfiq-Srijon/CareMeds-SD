@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ApiClient from "../api";
-import { Table, Spinner, Button, InputGroup, FormControl } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import toast from "react-hot-toast";
 import "../styles/Cart.css";
 
@@ -69,81 +69,102 @@ export default function Cart() {
     toast.success("Proceeding to checkout...");
   };
 
+  const grandTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
   return (
-    <>
-      <h2 className="text-center mb-4">Your Cart</h2>
+    <div className="cart-root">
 
-      {loading && <Spinner animation="border" className="d-block mx-auto" />}
+      {/* ── HEADER ── */}
+      <div className="cart-header">
+        <div className="cart-header-inner">
+          <span className="cart-eyebrow">Your Order</span>
+          <h1 className="cart-title">Your Cart</h1>
+          <p className="cart-subtitle">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} ready for checkout</p>
+        </div>
+      </div>
 
-      {!loading && cartItems.length === 0 && (
-        <p className="text-center text-muted">Cart is empty</p>
-      )}
+      {/* ── BODY ── */}
+      <div className="cart-body">
 
-      {cartItems.length > 0 && (
-        <>
-          <Table responsive striped bordered hover className="cart-table">
-            <thead>
-              <tr>
-                <th>Medicine</th>
-                <th>Company</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartItems.map(item => (
-                <tr key={item.cart_id}>
-                  <td data-label="Medicine">{item.name}</td>
-                  <td data-label="Company">{item.company}</td>
-                  <td data-label="Price">{item.price}</td>
-                  <td data-label="Quantity">
-                    <InputGroup>
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => updateQuantity(item.cart_id, item.quantity - 1)}
-                        disabled={updatingId === item.cart_id || item.quantity <= 1}
-                      >
-                        -
-                      </Button>
-                      <FormControl
-                        value={item.quantity}
-                        readOnly
-                        style={{ maxWidth: "60px", textAlign: "center" }}
-                      />
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => updateQuantity(item.cart_id, item.quantity + 1)}
-                        disabled={updatingId === item.cart_id}
-                      >
-                        +
-                      </Button>
-                    </InputGroup>
-                  </td>
-                  <td data-label="Total">{item.price * item.quantity}</td>
-                  <td data-label="Actions">
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => removeItem(item.cart_id)}
-                      disabled={updatingId === item.cart_id}
-                    >
-                      Remove
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-
-          <div className="text-end mt-3 cart-checkout-wrapper">
-            <Button variant="success" onClick={checkout}>
-              Checkout
-            </Button>
+        {loading && (
+          <div className="cart-loading">
+            <Spinner animation="border" />
+            <span>Loading your cart…</span>
           </div>
-        </>
-      )}
-    </>
+        )}
+
+        {!loading && cartItems.length === 0 && (
+          <div className="cart-empty">
+            <span className="cart-empty-icon">🛒</span>
+            <p>Your cart is empty</p>
+          </div>
+        )}
+
+        {cartItems.length > 0 && (
+          <>
+            <div className="cart-table-card">
+              <table className="cart-table">
+                <thead>
+                  <tr>
+                    <th>Medicine</th>
+                    <th>Company</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map(item => (
+                    <tr key={item.cart_id}>
+                      <td data-label="Medicine" className="td-name">{item.name}</td>
+                      <td data-label="Company" className="td-company">{item.company}</td>
+                      <td data-label="Price" className="td-price">{item.price} BDT</td>
+                      <td data-label="Quantity">
+                        <div className="qty-control">
+                          <button
+                            className="qty-btn"
+                            onClick={() => updateQuantity(item.cart_id, item.quantity - 1)}
+                            disabled={updatingId === item.cart_id || item.quantity <= 1}
+                          >−</button>
+                          <div className="qty-value">{item.quantity}</div>
+                          <button
+                            className="qty-btn"
+                            onClick={() => updateQuantity(item.cart_id, item.quantity + 1)}
+                            disabled={updatingId === item.cart_id}
+                          >+</button>
+                        </div>
+                      </td>
+                      <td data-label="Total" className="td-total">{item.price * item.quantity} BDT</td>
+                      <td data-label="Actions">
+                        <button
+                          className="remove-btn"
+                          onClick={() => removeItem(item.cart_id)}
+                          disabled={updatingId === item.cart_id}
+                        >Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── SUMMARY ── */}
+            <div className="cart-summary">
+              <div>
+                <div className="cart-total-label">Grand Total</div>
+                <div className="cart-total-value">{grandTotal} <span>BDT</span></div>
+              </div>
+              <button className="checkout-btn" onClick={checkout}>
+                <svg fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+                Proceed to Checkout
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }

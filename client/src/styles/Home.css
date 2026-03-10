@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 /* ── ROOT ── */
 .home-root {
@@ -15,6 +15,8 @@
   overflow: hidden;
   box-shadow: 0 8px 40px rgba(10,35,66,0.35), 0 2px 8px rgba(0,0,0,0.2);
   padding: 56px 0 48px;
+  border: 2px solid transparent;
+  border-radius: 20px;
 }
 
 .home-header::before {
@@ -64,7 +66,7 @@
 }
 
 .home-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: clamp(36px, 5vw, 58px);
   font-weight: 900;
   color: #fff;
@@ -220,7 +222,7 @@
 }
 
 .med-name {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Raleway', sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: #0a2342;
