@@ -1,172 +1,108 @@
-<<<<<<< HEAD
-# Full-Stack Project Starter Template
+# 💊 CareMeds – Medicine Availability System
 
-This is a **full-stack starter template** for students to build their projects.  
-It has a structured folder setup with separate **client**, **server**, and **database** directories, making it easy to organize your application logic and development workflow.
+## 📌 Project Overview
 
----
+### Project Title
+CareMeds – Medicine Availability System
 
-## Project Structure
+### Objective
+The objective of this project is to develop a web-based platform where users can easily check the availability of medicines and place orders online.
 
-project-root/
-├── client/ # Frontend application (React, Vue, etc.)
-├── server/ # Backend application (Laravel, Node.js, etc.)
-└── database/ # Database migrations, seeders, or SQL scripts
+The system helps users avoid visiting multiple pharmacies physically to search for medicines. The platform allows users to browse medicines, add them to a cart, and place orders either for home delivery or pharmacy pickup.
 
-
-- **client**: Your frontend code, responsible for UI and API requests.
-- **server**: The backend code (Laravel API in this template) handling business logic and serving API endpoints.
-- **database**: Database schema, migrations, and seed data.
+### Target Audience
+- General users searching for medicines
+- Patients who need medicines urgently
+- Pharmacy customers who prefer online ordering
 
 ---
 
-## Prerequisites
+# 👥 Team Members
 
-Make sure the following are installed:
-
-- PHP >= 8.1 (for Laravel backend)
-- Composer
-- Node.js >= 18
-- npm or Yarn
-- MySQL / PostgreSQL / SQLite
-
----
-
-## Setup Instructions
-
-```bash
-git clone <repository-url>
-cd project-root
-=======
-# CareMeds  
-Medicine Availability and Booking System
+| Name | Roll | Email | Role |
+|-----|-----|-----|-----|
+| MD. Mushfiqur Rahman | 20230104099 | mushfiqur.cse.20230104099@aust.edu | Team Lead & Backend Developer |
+| MD. Mahedi Hasan Oni | 20230104098 | mahedi.cse.20230104098@aust.edu | Frontend Developer |
+| Maimuna Momtaj Emu | 20230104078 | maimuna.cse.20230104078@aust.edu | Frontend Developer |
+| Sabikun Alam | 20230104095 | sabikun.cse.20230104095@aust.edu | Backend Developer |
 
 ---
 
-## Team Members
+# 🛠 Technology Stack
 
-### 1. MD. Mushfiqur Rahman  
-- **Roll:** 20230104099  
-- **Email:** mushfiqur.cse.20230104099@aust.edu  
-- **Role:** Team Lead & Backend Developer  
-
-### 2. MD. Mahedi Hasan Oni  
-- **Roll:** 20230104098  
-- **Email:** mahedi.cse.20230104098@aust.edu  
-- **Role:** Frontend Developer  
-
-### 3. Maimuna Momtaj Emu  
-- **Roll:** 20230104078  
-- **Email:** maimuna.cse.20230104078@aust.edu  
-- **Role:** Frontend Developer  
-
-### 4. Sabikun Alam  
-- **Roll:** 20230104095  
-- **Email:** sabikun.cse.20230104095@aust.edu  
-- **Role:** Backend Developer  
-
----
-
-## Project Overview
-
-### Project Title  
-**CareMeds – Medicine Availability and Booking System**
-
-### Objective  
-The objective of this project is to develop a web-based system that helps users easily check the availability of medicines in nearby pharmacies and reserve medicines in advance.  
-The system aims to reduce the difficulty of searching for medicines physically and prevent situations where medicines get sold out before the user arrives.
-
----
-
-## Target Audience
-- General users looking for medicines  
-- Pharmacy owners and staff  
-- Patients who need urgent or regular medicines  
-
----
-
-## Tech Stack
-
-### Backend
+## Backend
 - Laravel (PHP Framework)
 
-### Frontend
-- React  
-- HTML, CSS, JavaScript  
+## Frontend
+- React
+- HTML
+- CSS
+- JavaScript
 
-### Database
-- MySQL  
-
-### Rendering Method
-- Server-Side Rendering (SSR)
-
----
-
-## UI Design
-
-##FIGMA Design link - https://www.figma.com/make/ObVKtTEbUS4QDOJ2wc4wJd/PharmaTrack-Web-Application-UI?p=f&t=jFXLXi9uMLL59jmO-0
-
-### Home Page
-![Home](images/home.png)  
-![Home](images/home2.png)
-
-### Login Page
-![Login](images/login.png)
-
-### Register Page
-![Register](images/reg.png)
-
-### Search Page
-![Search](images/search.png)
-
-### Booking Page
-![Booking](images/book.png)
-
-### Pharmacy UI
-![Admin](images/pharmacy.png)
+## Database
+- MySQL
 
 ---
 
-## Project Features
-- User authentication system (Sign Up / Login)  
-- Role-based access (User & Pharmacy Admin)  
-- Medicine availability listing by pharmacy  
-- Medicine booking and reservation system  
-- CRUD operations for:
-  - Medicines  
-  - Pharmacies  
-  - Bookings  
-- Search and filter medicines  
-- Basic booking confirmation system  
+# ⚙ Rendering Method
+Client-Side Rendering (CSR)
 
 ---
 
-## API Endpoints (Approximate)
-- `GET /medicines` – Fetch available medicines  
-- `POST /medicines` – Add new medicine  
-- `GET /pharmacies` – Fetch pharmacy list  
-- `POST /bookings` – Book a medicine  
-- `GET /bookings` – View user bookings  
+# 🎨 UI Design
+
+Figma Design Link:
+
+https://www.figma.com/make/ObVKtTEbUS4QDOJ2wc4wJd/PharmaTrack-Web-Application-UI?p=f&t=jFXLXi9uMLL59jmO-0
 
 ---
 
-## Milestones
+# ✨ Project Features
 
-### Milestone 1: Project Setup & Basic Structure
-- Set up Laravel project  
-- Database design and migrations  
-- User authentication (Login/Register)  
-- Basic UI pages  
+- User registration and login system
+- Secure authentication using API tokens
+- Medicine listing and browsing
+- Search and filter medicines
+- Add medicines to cart
+- Update cart quantity and remove items from cart
+- Place medicine orders
+- Option for home delivery or pharmacy pickup
+- Automatic rider assignment for delivery orders
+- User profile page to update personal information
 
-### Milestone 2: Core Features Development
-- Medicine CRUD operations  
-- Pharmacy management  
-- Medicine availability display  
-- Search and filter functionality  
+---
 
-### Milestone 3: Booking System & Finalization
-- Medicine booking and reservation logic  
-- Booking history for users  
-- Admin dashboard for pharmacies  
-- UI polishing and testing  
->>>>>>> c314274147561e7714d3c741a90bfc1e5153034a
+# 🔗 API Endpoints
+
+| Method | Endpoint | Description |
+|------|------|------|
+| POST | /api/register | Register a new user |
+| POST | /api/login | Authenticate user and generate token |
+| GET | /api/medicines | Fetch list of available medicines |
+| POST | /api/cart | Add medicine to cart |
+| GET | /api/cart | View cart items |
+| DELETE | /api/cart/{id} | Remove item from cart |
+| POST | /api/orders | Place an order |
+| GET | /api/orders | View user orders |
+
+---
+
+# 📅 Project Milestones
+
+## Milestone 1 – Project Setup
+- Initial project setup
+- Database design
+- User authentication system (Login/Register)
+- Basic frontend pages
+
+## Milestone 2 – Core System Development
+- Medicine listing and display
+- Cart system implementation
+- Search and filtering functionality
+- API integration between frontend and backend
+
+## Milestone 3 – Order System
+- Order placement system
+- Delivery or pickup option
+- Rider assignment for delivery
+- Testing and debugging
