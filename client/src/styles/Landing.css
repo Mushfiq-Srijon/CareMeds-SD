@@ -102,8 +102,22 @@
   text-align: center;
 }
 
-.btn:hover { transform: translateY(-2px); opacity: 0.92; }
+/* .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0px); } */
+
 .btn:active { transform: translateY(0px); }
+
+.btn.btn-login:hover {
+  background: #ffffff;
+  color: #0a2342;
+  box-shadow: 0 0 18px 4px rgba(255, 255, 255, 0.45);
+}
+
+.btn.btn-register:hover {
+  border-color: #fff;
+  color: #ffffff;
+  box-shadow: 0 0 18px 4px rgba(93, 173, 226, 0.5);
+}
 
 .btn.btn-login {
   background: #ffffff;
@@ -117,14 +131,14 @@
   border: 1.5px solid rgba(255,255,255,0.55);
 }
 
-.btn.btn-register:hover { border-color: #fff; }
+/*.btn.btn-register:hover { border-color: #fff; }
 
-/* RIGHT – title */
+//RIGHT – title
 .hero-right {
   text-align: right;
   max-width: 480px;
   flex-shrink: 0;
-}
+}*/
 
 .hero-pill {
   display: inline-block;
