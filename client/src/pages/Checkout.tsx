@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Form, Spinner } from "react-bootstrap";
+import { Spinner } from "react-bootstrap";
 import ApiClient from "../api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import "../styles/Checkout.css";
 
 const apiClient = new ApiClient();
 
@@ -50,9 +51,8 @@ export default function Checkout() {
     setPlacingOrder(true);
 
     try {
-      // Backend expects pharmacy_id, delivery_type, items
       await apiClient.post("/api/orders", {
-        pharmacy_id: 1, // For simplicity, we can hardcode a pharmacy ID
+        pharmacy_id: 1,
         delivery_type: deliveryType,
         items: cartItems.map(item => ({
           medicine_id: item.medicine_id,
@@ -60,11 +60,10 @@ export default function Checkout() {
         }))
       });
 
-      // Clear cart
       await apiClient.clearCart();
 
       toast.success("Order placed successfully!");
-      navigate("/home"); // redirect to home or success page
+      navigate("/home");
     } catch (error: any) {
       toast.error(error?.message || "Failed to place order");
     }
@@ -72,92 +71,174 @@ export default function Checkout() {
     setPlacingOrder(false);
   };
 
-  if (loading) return <Spinner animation="border" className="d-block mx-auto mt-5" />;
+  if (loading) return (
+    <div className="checkout-loading">
+      <Spinner animation="border" />
+      <span>Loading your order…</span>
+    </div>
+  );
 
-  if (cartItems.length === 0) return <p className="text-center mt-5">Cart is empty</p>;
+  if (cartItems.length === 0) return (
+    <div className="checkout-empty">
+      <span className="checkout-empty-icon">🛒</span>
+      <p>Your cart is empty</p>
+    </div>
+  );
 
   return (
-    <div className="container mt-4">
-      <h2>Checkout</h2>
+    <div className="checkout-root">
 
-      <h4 className="mt-4">Customer Information</h4>
-      <Form>
-        <Form.Group className="mb-2">
-          <Form.Label>Full Name</Form.Label>
-          <Form.Control
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-2">
-          <Form.Label>Phone Number</Form.Label>
-          <Form.Control
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-2">
-          <Form.Label>Delivery Address</Form.Label>
-          <Form.Control
-            as="textarea"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-        </Form.Group>
-      </Form>
-
-      <h4 className="mt-4">Cart Items</h4>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Medicine</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cartItems.map(item => (
-            <tr key={item.cart_id}>
-              <td>{item.name}</td>
-              <td>{item.price}</td>
-              <td>{item.quantity}</td>
-              <td>{item.price * item.quantity}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-
-      <div className="mt-3">
-        <h5>Delivery Method</h5>
-        <Form.Check
-          type="radio"
-          label={`Home Delivery (+50 BDT)`}
-          checked={deliveryType === "home_delivery"}
-          onChange={() => setDeliveryType("home_delivery")}
-        />
-        <Form.Check
-          type="radio"
-          label="Pickup (0 BDT)"
-          checked={deliveryType === "pickup"}
-          onChange={() => setDeliveryType("pickup")}
-        />
+      {/* ── HEADER ── */}
+      <div className="checkout-header">
+        <div className="checkout-header-inner">
+          <span className="checkout-eyebrow">Almost there</span>
+          <h1 className="checkout-title">Checkout</h1>
+          <p className="checkout-subtitle">Review your order and confirm your details below.</p>
+        </div>
       </div>
 
-      <h4 className="mt-3">Grand Total: {grandTotal} BDT</h4>
+      {/* ── BODY ── */}
+      <div className="checkout-body">
+        <div className="checkout-grid">
 
-      <Button
-        variant="success"
-        className="mt-3"
-        onClick={placeOrder}
-        disabled={placingOrder}
-      >
-        {placingOrder ? "Placing Order..." : "Place Order"}
-      </Button>
+          {/* LEFT – form */}
+          <div className="checkout-left">
+
+            {/* Customer Info */}
+            <div className="co-card">
+              <div className="co-card-heading">
+                <div className="co-card-icon">👤</div>
+                <h3>Customer Information</h3>
+              </div>
+
+              <div className="co-field">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Mushfiqur Rahman"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+              </div>
+
+              <div className="co-field">
+                <label>Phone Number</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 017XXXXXXXX"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
+
+              <div className="co-field">
+                <label>Delivery Address</label>
+                <textarea
+                  placeholder="Enter your full delivery address…"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Delivery Method */}
+            <div className="co-card">
+              <div className="co-card-heading">
+                <div className="co-card-icon">🚚</div>
+                <h3>Delivery Method</h3>
+              </div>
+
+              <div className="delivery-options">
+                <div
+                  className={`delivery-option ${deliveryType === "home_delivery" ? "selected" : ""}`}
+                  onClick={() => setDeliveryType("home_delivery")}
+                >
+                  <div className="delivery-radio" />
+                  <div className="delivery-info">
+                    <div className="delivery-label">Home Delivery</div>
+                    <div className="delivery-sub">Delivered to your door</div>
+                  </div>
+                  <div className="delivery-price">+50 BDT</div>
+                </div>
+
+                <div
+                  className={`delivery-option ${deliveryType === "pickup" ? "selected" : ""}`}
+                  onClick={() => setDeliveryType("pickup")}
+                >
+                  <div className="delivery-radio" />
+                  <div className="delivery-info">
+                    <div className="delivery-label">Self Pickup</div>
+                    <div className="delivery-sub">Collect from the pharmacy</div>
+                  </div>
+                  <div className="delivery-price free">Free</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT – order summary */}
+          <div className="checkout-right">
+            <div className="co-card co-summary">
+              <div className="co-card-heading">
+                <div className="co-card-icon">🧾</div>
+                <h3>Order Summary</h3>
+              </div>
+
+              <div className="summary-items">
+                {cartItems.map(item => (
+                  <div className="summary-item" key={item.cart_id}>
+                    <div className="summary-item-left">
+                      <div className="summary-item-name">{item.name}</div>
+                      <div className="summary-item-qty">× {item.quantity}</div>
+                    </div>
+                    <div className="summary-item-total">{item.price * item.quantity} BDT</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="summary-divider" />
+
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <span>{totalPrice} BDT</span>
+              </div>
+              <div className="summary-row">
+                <span>Delivery</span>
+                <span>{deliveryCharge === 0 ? "Free" : `${deliveryCharge} BDT`}</span>
+              </div>
+
+              <div className="summary-divider" />
+
+              <div className="summary-grand">
+                <span>Grand Total</span>
+                <span className="grand-value">{grandTotal} <small>BDT</small></span>
+              </div>
+
+              <button
+                className="place-order-btn"
+                onClick={placeOrder}
+                disabled={placingOrder}
+              >
+                {placingOrder ? (
+                  <>
+                    <Spinner animation="border" size="sm" />
+                    Placing Order…
+                  </>
+                ) : (
+                  <>
+                    <svg fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                    Place Order
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }
