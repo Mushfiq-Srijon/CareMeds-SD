@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\Registered;
 
 class AuthController extends Controller
 {
@@ -25,13 +26,19 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+    'name' => $request->name,
+    'email' => $request->email,
+    'password' => Hash::make($request->password),
+    'role' => $request->role,
+]);
 
-        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
+// Send verification email automatically after registration
+event(new Registered($user));
+
+return response()->json([
+    'message' => 'Registration successful. Please check your email to verify your account.',
+    'user' => $user
+], 201);
     }
 
     // Login method
@@ -40,19 +47,26 @@ class AuthController extends Controller
     $credentials = $request->only('email', 'password');
 
     if (!Auth::attempt($credentials)) {
-        return response()->json([
-            'message' => 'Invalid credentials'
-        ], 401);
-    }
-
-    $user = Auth::user();
-
-    $token = $user->createToken('api-token')->plainTextToken;
-
     return response()->json([
-        'message' => 'Login successful',
-        'token' => $token,
-        'user' => $user
-    ]);
+        'message' => 'Invalid credentials'
+    ], 401);
+}
+
+$user = Auth::user();
+
+// Block login if email is not verified
+if (!$user->hasVerifiedEmail()) {
+    return response()->json([
+        'message' => 'Please verify your email before logging in. Check your inbox.'
+    ], 403);
+}
+
+$token = $user->createToken('api-token')->plainTextToken;
+
+return response()->json([
+    'message' => 'Login successful',
+    'token' => $token,
+    'user' => $user
+]);
 }
 }
