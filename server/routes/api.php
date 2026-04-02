@@ -7,6 +7,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\EmailVerificationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -21,9 +22,12 @@ Route::get('/medicines', [MedicineController::class, 'index']);
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/reset-password',  [PasswordResetController::class, 'resetPassword']);
 
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->name('verification.verify');
 
 Route::middleware('auth:sanctum')->group(function () {
 
+    Route::post('/email/resend', [EmailVerificationController::class, 'sendVerificationEmail']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/my-orders', [OrderController::class, 'myOrders']);
 
