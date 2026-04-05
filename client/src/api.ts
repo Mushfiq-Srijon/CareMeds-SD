@@ -13,17 +13,7 @@ class ApiClient {
       },
     });
   }
-async delete(endpoint: string, config?: AxiosRequestConfig) {
-  try {
-    const res = await this.client.delete(endpoint, { ...config, ...this.getAuthConfig() });
-    return res.data;
-  } catch (error: any) {
-    this.handleError(error);
-    throw error;
-  }
-}
 
-  // Get auth headers with token
   private getAuthConfig() {
     const token = localStorage.getItem('auth_token');
     if (!token) return {};
@@ -32,66 +22,96 @@ async delete(endpoint: string, config?: AxiosRequestConfig) {
     };
   }
 
-async get(endpoint: string, config?: AxiosRequestConfig) {
-  try {
-    const res = await this.client.get(endpoint, { ...config, ...this.getAuthConfig() });
-    return res.data;
-  } catch (error: any) {
-    this.handleError(error);
-    throw error; // VERY IMPORTANT
+  async get(endpoint: string, config?: AxiosRequestConfig) {
+    try {
+      const res = await this.client.get(endpoint, { ...config, ...this.getAuthConfig() });
+      return res.data;
+    } catch (error: any) {
+      this.handleError(error);
+      throw error;
+    }
   }
-}
 
-async post(endpoint: string, data: any, config?: AxiosRequestConfig) {
-  try {
-    const res = await this.client.post(endpoint, data, { ...config, ...this.getAuthConfig() });
-    return res.data;
-  } catch (error: any) {
-    this.handleError(error);
-    throw error; // VERY IMPORTANT
+  async post(endpoint: string, data: any, config?: AxiosRequestConfig) {
+    try {
+      const res = await this.client.post(endpoint, data, { ...config, ...this.getAuthConfig() });
+      return res.data;
+    } catch (error: any) {
+      this.handleError(error);
+      throw error;
+    }
   }
-}
+
+  async put(endpoint: string, data: any, config?: AxiosRequestConfig) {
+    try {
+      const res = await this.client.put(endpoint, data, { ...config, ...this.getAuthConfig() });
+      return res.data;
+    } catch (error: any) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  async delete(endpoint: string, config?: AxiosRequestConfig) {
+    try {
+      const res = await this.client.delete(endpoint, { ...config, ...this.getAuthConfig() });
+      return res.data;
+    } catch (error: any) {
+      this.handleError(error);
+      throw error;
+    }
+  }
 
   // Medicines
   async getMedicines() {
     return this.get('/api/medicines');
   }
 
-  // Add to cart
+  //  5: Get single medicine with pharmacy info
+  async getMedicineById(id: number) {
+    return this.get(`/api/medicines/${id}`);
+  }
+
+  // Cart
   async addToCart(medicineId: number, quantity: number = 1) {
     return this.post('/api/cart/add', { medicine_id: medicineId, quantity });
   }
- 
-async getCart() {
-  return this.get("/api/cart/list");
-}
-// Update quantity
-async updateCart(cartId: number, quantity: number) {
-  return this.client.put(
-    "/api/cart/update",
-    { cart_id: cartId, quantity },
-    this.getAuthConfig()
-  );
-}
 
-// Remove item
-async removeCartItem(cartId: number) {
-  return this.client.delete(
-    `/api/cart/remove/${cartId}`,
-    this.getAuthConfig()
-  );
-}
-// Clear entire cart
-async clearCart() {
-    return this.delete("/api/cart/clear");
-}
-async forgotPassword(email: string) {
+  async getCart() {
+    return this.get('/api/cart/list');
+  }
+
+  async updateCart(cartId: number, quantity: number) {
+    return this.client.put(
+      '/api/cart/update',
+      { cart_id: cartId, quantity },
+      this.getAuthConfig()
+    );
+  }
+
+  async removeCartItem(cartId: number) {
+    return this.client.delete(
+      `/api/cart/remove/${cartId}`,
+      this.getAuthConfig()
+    );
+  }
+
+  async clearCart() {
+    return this.delete('/api/cart/clear');
+  }
+
+  async forgotPassword(email: string) {
     return this.post('/api/forgot-password', { email });
-}
+  }
 
-async resetPassword(email: string, token: string, password: string) {
+  async resetPassword(email: string, token: string, password: string) {
     return this.post('/api/reset-password', { email, token, password });
-}
+  }
+
+  // 3: My Orders
+  async getMyOrders() {
+    return this.get('/api/my-orders');
+  }
 
   handleError(error: any) {
     if (error.response) {

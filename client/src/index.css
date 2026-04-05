@@ -1,10 +1,26 @@
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
 :root {
-  font-family: 'Josefin Sans', serif;
+  font-family: 'DM Sans', sans-serif;
   line-height: 1.5;
   font-weight: 400;
 }
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  font-family: 'Josefin Sans', serif;
+  font-family: 'DM Sans', sans-serif;
+  background: #f0f4f8;
+  color: #1a2e44;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Raleway', sans-serif;
 }
 
 .layout {
@@ -13,23 +29,12 @@ body {
   min-height: 100vh;
 }
 
-header {
-  padding: 1em;
-}
-
-main {
-  flex: 1;
-  padding: 1em;
-}
-footer {
-  padding: 1em;
-  text-align: center;
-}
+header { padding: 1em; }
+main { flex: 1; }
+footer { padding: 1em; text-align: center; }
 
 @media (min-width: 576px) {
-  .w-lg-400 {
-    width: 400px;
-  }
+  .w-lg-400 { width: 400px; }
 }
 
 @media (min-width: 576px) {

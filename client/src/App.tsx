@@ -14,6 +14,8 @@ import Help from './pages/Help';
 import Checkout from './pages/Checkout';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import MyOrders from './pages/MyOrders';
+import MedicineDetail from './pages/MedicineDetail'; // ✅ Task 5
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -38,90 +40,31 @@ function App() {
             </BaseLayout>
           }
         >
-          {/* Landing Page */}
           <Route path="/" element={<Landing />} />
 
-          {/* Home Page */}
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
 
-          {/* Auth Pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* Main Pages */}
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <ProtectedRoute>
-                <About />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/help"
-            element={
-              <ProtectedRoute>
-                <Help />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pharmacy"
-            element={
-              <RoleRoute role="pharmacy">
-                <PharmacyDashboard />
-              </RoleRoute>
-            }
-          />
-          <Route
-            path="/rider"
-            element={
-              <RoleRoute role="rider">
-                <RiderPanel />
-              </RoleRoute>
-            }
-          />
+
+          <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+          <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+
+          {/* ✅ Task 5 — Medicine Detail */}
+          <Route path="/medicine/:id" element={<ProtectedRoute><MedicineDetail /></ProtectedRoute>} />
+
+          <Route path="/pharmacy" element={<RoleRoute role="pharmacy"><PharmacyDashboard /></RoleRoute>} />
+          <Route path="/rider" element={<RoleRoute role="rider"><RiderPanel /></RoleRoute>} />
         </Route>
       </Routes>
 
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          error: { duration: 5000 },
-        }}
-      />
+      <Toaster position="top-center" toastOptions={{ error: { duration: 5000 } }} />
     </>
   );
 }
