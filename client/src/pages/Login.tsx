@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false); // TASK 6: added
   const navigate = useNavigate();
 
   const handleLogin = async (e?: React.FormEvent) => {
@@ -19,18 +20,30 @@ function Login() {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        // Save token in localStorage
-        localStorage.setItem("auth_token", data.token);
 
-        if (data.user) {
-          localStorage.setItem("user_name", data.user.name);
-          localStorage.setItem("user_id", data.user.id);
-          localStorage.setItem("user_role", data.user.role);
+        // TASK 6: save token based on Remember Me checkbox
+        if (rememberMe) {
+          // Checked → localStorage (stays after browser closes)
+          localStorage.setItem("auth_token", data.token);
+          if (data.user) {
+            localStorage.setItem("user_name", data.user.name);
+            localStorage.setItem("user_id", data.user.id);
+            localStorage.setItem("user_role", data.user.role);
+          }
+        } else {
+          // Not checked → sessionStorage (clears when tab closes)
+          sessionStorage.setItem("auth_token", data.token);
+          if (data.user) {
+            sessionStorage.setItem("user_name", data.user.name);
+            sessionStorage.setItem("user_id", data.user.id);
+            sessionStorage.setItem("user_role", data.user.role);
+          }
         }
 
         if (data.user.role === "customer") navigate("/home");
         else if (data.user.role === "pharmacy") navigate("/pharmacy");
         else if (data.user.role === "rider") navigate("/rider");
+
       } else {
         alert("Login Failed: " + (data.message || "Check credentials"));
       }
@@ -45,7 +58,8 @@ function Login() {
       <div style={styles.card}>
         <h2 style={styles.title}>Login</h2>
         <form onSubmit={handleLogin}>
-          {/* Email Input */}
+
+          {/* Email Input — NO CHANGE */}
           <div style={styles.inputGroup}>
             <input
               type="email"
@@ -67,7 +81,7 @@ function Login() {
             </label>
           </div>
 
-          {/* Password Input */}
+          {/* Password Input — NO CHANGE */}
           <div style={styles.inputGroup}>
             <input
               type="password"
@@ -89,13 +103,27 @@ function Login() {
             </label>
           </div>
 
-          {/* Login Button */}
+          {/* TASK 6: Remember Me checkbox — only this row is new */}
+          <div style={styles.rememberMeRow}>
+            <label style={styles.rememberMeLabel}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={styles.checkbox}
+              />
+              <span>Remember Me</span>
+            </label>
+          </div>
+
+          {/* Login Button — NO CHANGE */}
           <button type="submit" style={styles.button}>
             Login
           </button>
+
         </form>
 
-        {/* Signup Link */}
+        {/* Signup Link — NO CHANGE */}
         <p style={styles.signupText}>
           Don't have an account?{" "}
           <Link to="/register" style={styles.signupLink}>
@@ -113,6 +141,7 @@ function Login() {
 }
 
 const styles = {
+  // ── All original styles — NO CHANGE ──
   container: {
     display: "flex",
     justifyContent: "center",
@@ -180,6 +209,26 @@ const styles = {
     color: "#4da6ff",
     fontWeight: "600",
     textDecoration: "none",
+  },
+
+  // ── TASK 6: only these 3 are new ──
+  rememberMeRow: {
+    marginBottom: "24px",
+    textAlign: "left",
+  },
+  rememberMeLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    cursor: "pointer",
+    fontSize: "14px",
+    color: "#c0d6f9",
+  },
+  checkbox: {
+    width: "16px",
+    height: "16px",
+    accentColor: "#4da6ff",
+    cursor: "pointer",
   },
 };
 

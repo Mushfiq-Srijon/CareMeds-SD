@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ApiClient from '../api';
 import { Spinner } from 'react-bootstrap';
 import toast from 'react-hot-toast';
@@ -20,18 +21,18 @@ export default function Home() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Add to cart
-  const handleAddToCart = async (medicineId: number) => {
+  const handleAddToCart = async (e: React.MouseEvent, medicineId: number) => {
+    e.stopPropagation(); // prevent card click
     try {
       await apiClient.addToCart(medicineId, 1);
       toast.success('Added to cart!');
-    } catch (error) {
+    } catch {
       toast.error('Failed to add to cart');
     }
   };
 
-  // Fetch medicines
   useEffect(() => {
     const fetchMedicines = async () => {
       setLoading(true);
@@ -52,7 +53,7 @@ export default function Home() {
   return (
     <div className="home-root">
 
-      {/* ── HEADER ── */}
+      {/* HEADER */}
       <div className="home-header">
         <div className="home-header-inner">
           <div className="home-title-group">
@@ -76,7 +77,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── BODY ── */}
+      {/* BODY */}
       <div className="home-body">
 
         {loading && (
@@ -98,7 +99,8 @@ export default function Home() {
             <div
               className="med-card"
               key={m.id}
-              style={{ animationDelay: `${i * 0.06}s` }}
+              style={{ animationDelay: `${i * 0.06}s`, cursor: 'pointer' }}
+              onClick={() => navigate(`/medicine/${m.id}`)}
             >
               <div className="med-card-top">
                 <div className="med-category-badge">{m.category}</div>
@@ -128,7 +130,7 @@ export default function Home() {
                 <button
                   className={`add-cart-btn ${m.stock === 0 ? 'disabled' : ''}`}
                   disabled={m.stock === 0}
-                  onClick={() => handleAddToCart(m.id)}
+                  onClick={(e) => handleAddToCart(e, m.id)}
                 >
                   {m.stock === 0 ? 'Out of Stock' : (
                     <>

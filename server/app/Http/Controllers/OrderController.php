@@ -84,4 +84,25 @@ class OrderController extends Controller
             ]);
         });
     }
+
+   
+    public function myOrders(Request $request)
+    {
+        $user = $request->user();
+
+        $sql = "
+            SELECT o.*,
+                   GROUP_CONCAT(m.name SEPARATOR ', ') as medicine_names
+            FROM orders o
+            JOIN order_items oi ON o.id = oi.order_id
+            JOIN medicines m ON oi.medicine_id = m.id
+            WHERE o.user_id = ?
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        ";
+
+        $orders = DB::select($sql, [$user->id]);
+
+        return response()->json($orders);
+    }
 }
