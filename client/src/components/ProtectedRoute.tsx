@@ -5,14 +5,13 @@ interface Props {
 }
 
 const ProtectedRoute = ({ children }: Props) => {
-  // TASK 6: check both localStorage and sessionStorage
-  const token = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
+    const token = localStorage.getItem("auth_token");
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+    if (!token) {
+        return <Navigate to="/login" replace />;
+    }
 
-  return children;
+    return children;
 };
 
 export default ProtectedRoute;

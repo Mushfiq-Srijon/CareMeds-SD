@@ -15,8 +15,7 @@ class ApiClient {
   }
 
   private getAuthConfig() {
-    //  6: check both localStorage and sessionStorage
-    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
     if (!token) return {};
     return {
       headers: { Authorization: `Bearer ${token}` },
@@ -68,7 +67,7 @@ class ApiClient {
     return this.get('/api/medicines');
   }
 
-  // 5: Get single medicine with pharmacy info
+  //  5: Get single medicine with pharmacy info
   async getMedicineById(id: number) {
     return this.get(`/api/medicines/${id}`);
   }
@@ -112,36 +111,6 @@ class ApiClient {
   // 3: My Orders
   async getMyOrders() {
     return this.get('/api/my-orders');
-  }
-
-  //  2: Pharmacy
-  async getPharmacyProfile() {
-    return this.get('/api/pharmacy/profile');
-  }
-
-  async setupPharmacy(data: object) {
-    return this.post('/api/pharmacy/setup', data);
-  }
-
-  async getPharmacyMedicines() {
-    return this.get('/api/pharmacy/medicines');
-  }
-
-  async addMedicine(data: object) {
-    return this.post('/api/medicines', data);
-  }
-
-  async updateMedicine(id: number, data: object) {
-    return this.put(`/api/medicines/${id}`, data);
-  }
-
-  async deleteMedicine(id: number) {
-    return this.delete(`/api/medicines/${id}`);
-  }
-
-  //  4: Pharmacy incoming orders
-  async getPharmacyOrders() {
-    return this.get('/api/pharmacy/orders');
   }
 
   handleError(error: any) {

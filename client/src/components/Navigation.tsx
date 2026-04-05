@@ -6,7 +6,7 @@ export default function Navigation() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // TASK 6: check both localStorage and sessionStorage
+  // Task 6: check both storages
   const role = localStorage.getItem("user_role") || sessionStorage.getItem("user_role") || "";
 
   // Hide navbar on landing page
@@ -19,7 +19,7 @@ export default function Navigation() {
   const allNavItems = [
     { path: '/home',      label: 'Home',        roles: ['customer'] },
     { path: '/cart',      label: 'Cart',        roles: ['customer'] },
-    { path: '/my-orders', label: 'My Orders',   roles: ['customer'] },
+    { path: '/my-orders', label: 'My Orders',   roles: ['customer'] }, // ← THIS WAS MISSING
     { path: '/pharmacy',  label: 'Dashboard',   roles: ['pharmacy'] },
     { path: '/rider',     label: 'My Orders',   roles: ['rider'] },
     { path: '/about',     label: 'About',       roles: ['customer', 'pharmacy', 'rider'] },

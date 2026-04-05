@@ -45,7 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pharmacy/setup',    [PharmacyController::class, 'setup']);
     Route::get('/pharmacy/medicines', [PharmacyController::class, 'medicines']);
     Route::get('/pharmacy/orders',    [PharmacyController::class, 'orders']);
-
+    Route::put('/pharmacy/orders/{id}/status', [OrderController::class, 'updateOrderStatus']);
+Route::get('/pharmacy/orders/{id}/items', [OrderController::class, 'orderItems']);
     // Medicine CRUD
     Route::post('/medicines',        [MedicineController::class, 'store']);
     Route::put('/medicines/{id}',    [MedicineController::class, 'update']);

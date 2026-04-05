@@ -1,4 +1,5 @@
 import Navigation from '../components/Navigation';
+import Footer from '../components/Footer';
 import { useLocation } from 'react-router-dom';
 
 export default function BaseLayout({ children }: { children: React.ReactNode }) {
@@ -14,9 +15,8 @@ export default function BaseLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
 
-      <footer className="bg-white border-top text-center py-3 small">
-        © 2026 CareMeds | AUST CSE
-      </footer>
+      {/* Task 8: replaced old plain footer with new Footer component */}
+      <Footer />
     </div>
   );
 }

@@ -5,7 +5,6 @@ import '../styles/PharmacyDashboard.css';
 
 const apiClient = new ApiClient();
 
-// ── Types ──────────────────────────────────────────────
 interface Pharmacy {
   id: number;
   pharmacy_name: string;
@@ -27,13 +26,17 @@ interface Order {
   id: number;
   customer_name: string;
   customer_email: string;
+  medicine_names: string;
   total_price: number;
+  delivery_charge: number;
   delivery_type: string;
   status: string;
+  address: string;
+  phone: string;
   created_at: string;
 }
 
-const emptyProfile = { pharmacy_name: '', location: '', phone: '' };
+const emptyProfile  = { pharmacy_name: '', location: '', phone: '' };
 const emptyMedicine = {
   name: '', generic_name: '', company: '',
   category: '', stock: '', price: ''
@@ -41,10 +44,9 @@ const emptyMedicine = {
 
 const isValidPhone = (phone: string) => /^01[0-9]{9}$/.test(phone);
 
-// ══════════════════════════════════════════════════════
 export default function PharmacyDashboard() {
 
-  const [tab, setTab]                       = useState<'medicines' | 'orders'>('medicines');
+  const [tab, setTab] = useState<'medicines' | 'orders'>('medicines');
 
   // profile
   const [pharmacy, setPharmacy]             = useState<Pharmacy | null>(null);
@@ -55,34 +57,29 @@ export default function PharmacyDashboard() {
   const [phoneTouched, setPhoneTouched]     = useState(false);
 
   // medicines
-  const [medicines, setMedicines]           = useState<Medicine[]>([]);
-  const [medLoading, setMedLoading]         = useState(false);
-  const [showAddModal, setShowAddModal]     = useState(false);
-  const [addForm, setAddForm]               = useState(emptyMedicine);
-  const [addSaving, setAddSaving]           = useState(false);
-
-  // edit medicine
-  const [editMed, setEditMed]               = useState<Medicine | null>(null);
-  const [editForm, setEditForm]             = useState({ stock: '', price: '' });
-  const [editSaving, setEditSaving]         = useState(false);
+  const [medicines, setMedicines]       = useState<Medicine[]>([]);
+  const [medLoading, setMedLoading]     = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm]           = useState(emptyMedicine);
+  const [addSaving, setAddSaving]       = useState(false);
+  const [editMed, setEditMed]           = useState<Medicine | null>(null);
+  const [editForm, setEditForm]         = useState({ stock: '', price: '' });
+  const [editSaving, setEditSaving]     = useState(false);
 
   // orders
-  const [orders, setOrders]                 = useState<Order[]>([]);
-  const [ordersLoading, setOrdersLoading]   = useState(false);
+  const [orders, setOrders]                   = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading]     = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
+  const [selectedOrder, setSelectedOrder]     = useState<Order | null>(null);
 
-  // ── on mount: load profile ──
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useEffect(() => { fetchProfile(); }, []);
 
-  // ── when tab changes, load data ──
   useEffect(() => {
     if (!pharmacy) return;
     if (tab === 'medicines') fetchMedicines();
     if (tab === 'orders') fetchOrders();
   }, [tab, pharmacy]);
 
-  // ── API calls ──────────────────────────────────────
   async function fetchProfile() {
     setProfileLoading(true);
     try {
@@ -92,7 +89,7 @@ export default function PharmacyDashboard() {
         fetchMedicines();
       }
     } catch {
-      // 404 = no profile yet, that is fine
+      // no profile yet
     } finally {
       setProfileLoading(false);
     }
@@ -122,17 +119,36 @@ export default function PharmacyDashboard() {
     }
   }
 
-  // ── profile submit ──
+  async function handleUpdateStatus(orderId: number, newStatus: string) {
+    setUpdatingOrderId(orderId);
+    try {
+      const res = await apiClient.put(
+        `/api/pharmacy/orders/${orderId}/status`,
+        { status: newStatus }
+      );
+      if (res.success) {
+        toast.success(`Order #${orderId} marked as ${newStatus}!`);
+        setOrders(prev =>
+          prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o)
+        );
+        if (selectedOrder && selectedOrder.id === orderId) {
+          setSelectedOrder({ ...selectedOrder, status: newStatus });
+        }
+      }
+    } catch {
+      toast.error('Could not update order status.');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  }
+
   async function handleProfileSubmit(e: React.FormEvent) {
     e.preventDefault();
     setPhoneTouched(true);
-
-    // block submit if phone invalid
     if (!isValidPhone(profileForm.phone)) {
       toast.error('Phone must start with 01 and be exactly 11 digits.');
       return;
     }
-
     setProfileSaving(true);
     try {
       const res = await apiClient.post('/api/pharmacy/setup', profileForm);
@@ -150,7 +166,6 @@ export default function PharmacyDashboard() {
     }
   }
 
-  // ── add medicine ──
   async function handleAddMedicine(e: React.FormEvent) {
     e.preventDefault();
     setAddSaving(true);
@@ -173,7 +188,6 @@ export default function PharmacyDashboard() {
     }
   }
 
-  // ── edit medicine ──
   async function handleEditMedicine(e: React.FormEvent) {
     e.preventDefault();
     if (!editMed) return;
@@ -195,7 +209,6 @@ export default function PharmacyDashboard() {
     }
   }
 
-  // ── delete medicine ──
   async function handleDeleteMedicine(id: number) {
     if (!window.confirm('Delete this medicine?')) return;
     try {
@@ -209,22 +222,195 @@ export default function PharmacyDashboard() {
     }
   }
 
-  // ── phone input change handler ──
   function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
-    // only allow numbers
     const val = e.target.value.replace(/[^0-9]/g, '');
-    // max 11 digits
     if (val.length <= 11) {
       setProfileForm({ ...profileForm, phone: val });
     }
   }
 
-  // phone validation state for showing error
   const phoneError = phoneTouched && !isValidPhone(profileForm.phone);
 
-  // ══════════════════════════════════════════════════
-  // RENDER
-  // ══════════════════════════════════════════════════
+  function getStatusClass(status: string) {
+    switch (status) {
+      case 'pending':   return 'pd-badge pending';
+      case 'confirmed': return 'pd-badge confirmed';
+      case 'assigned':  return 'pd-badge assigned';
+      case 'delivered': return 'pd-badge delivered';
+      case 'completed': return 'pd-badge completed';
+      default:          return 'pd-badge';
+    }
+  }
+
+  // ── Order Detail View ──
+  function OrderDetail({ order }: { order: Order }) {
+    return (
+      <div>
+        <div className="pd-order-header" style={{ marginBottom: 16 }}>
+          <span className="pd-order-id" style={{ fontSize: '1.2rem' }}>
+            Order #{order.id}
+          </span>
+          <span className={getStatusClass(order.status)}>
+            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+          {/* ── Medicines ordered by customer ── */}
+          <div className="pd-order-row">
+            <span className="pd-order-label">💊 Medicines</span>
+            <span className="pd-order-value" style={{ color: '#1a6fa8', fontWeight: 600 }}>
+              {order.medicine_names
+                ? order.medicine_names.split(',').map((name, i) => (
+                    <span key={i} style={{
+                      display: 'inline-block',
+                      background: '#eaf4fb',
+                      color: '#0d3b6e',
+                      borderRadius: 6,
+                      padding: '2px 10px',
+                      margin: '2px 4px 2px 0',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                    }}>
+                      {name.trim()}
+                    </span>
+                  ))
+                : '—'}
+            </span>
+          </div>
+
+          <div className="pd-order-row">
+            <span className="pd-order-label">👤 Customer</span>
+            <span className="pd-order-value">{order.customer_name}</span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">✉️ Email</span>
+            <span className="pd-order-value">{order.customer_email}</span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">📞 Phone</span>
+            <span className="pd-order-value">{order.phone || '—'}</span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">📍 Address</span>
+            <span className="pd-order-value">{order.address || '—'}</span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">🚚 Delivery</span>
+            <span className="pd-order-value" style={{ textTransform: 'capitalize' }}>
+              {order.delivery_type === 'home_delivery' ? 'Home Delivery' : 'Pickup'}
+            </span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">📦 Del. Charge</span>
+            <span className="pd-order-value">৳{Number(order.delivery_charge).toFixed(2)}</span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">💰 Total</span>
+            <span className="pd-order-value"
+              style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0a2342' }}>
+              ৳{Number(order.total_price).toFixed(2)}
+            </span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">📅 Date</span>
+<span className="pd-order-value">
+  {new Date(new Date(order.created_at).getTime() + 6 * 60 * 60 * 1000).toLocaleString()}
+</span>
+          </div>
+        </div>
+
+        <div className="pd-order-actions" style={{ marginTop: 20 }}>
+          {order.status === 'pending' && (
+            <button
+              className="pd-btn-confirm"
+              disabled={updatingOrderId === order.id}
+              onClick={() => handleUpdateStatus(order.id, 'delivered')}
+            >
+              {updatingOrderId === order.id ? 'Updating...' : '✅ Mark as Delivered'}
+            </button>
+          )}
+          {order.status === 'delivered' && (
+            <span className="pd-delivered-text">✅ Order Delivered</span>
+          )}
+          {order.status === 'completed' && (
+            <span className="pd-delivered-text">✅ Order Completed</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Order List View ──
+  function OrderList() {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {orders.map((order, index) => (
+          <div
+            key={order.id}
+            onClick={() => setSelectedOrder(order)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '14px 20px',
+              background: '#f8fbff',
+              border: '1.5px solid #d0dce8',
+              borderRadius: 12,
+              cursor: 'pointer',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(10,35,66,0.12)';
+              (e.currentTarget as HTMLDivElement).style.borderColor = '#5dade2';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLDivElement).style.boxShadow = 'none';
+              (e.currentTarget as HTMLDivElement).style.borderColor = '#d0dce8';
+            }}
+          >
+            {/* Left: serial + info */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{
+                width: 32, height: 32, flexShrink: 0,
+                background: '#0d3b6e', color: '#fff',
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 700, fontSize: '0.85rem',
+              }}>
+                {index + 1}
+              </span>
+              <div>
+                <div style={{ fontWeight: 700, color: '#0a2342', fontSize: '0.95rem' }}>
+                  Order #{order.id}
+                  <span style={{ fontWeight: 400, color: '#7f8c9a', fontSize: '0.82rem', marginLeft: 8 }}>
+                    {order.customer_name}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.82rem', color: '#1a6fa8', marginTop: 3 }}>
+                  💊 {order.medicine_names || '—'}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: total + status + arrow */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0a2342' }}>
+                ৳{Number(order.total_price).toFixed(2)}
+              </span>
+              <span className={getStatusClass(order.status)}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </span>
+              <span style={{ color: '#7f8c9a', fontSize: '1.2rem', lineHeight: 1 }}>›</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Hero */}
@@ -247,34 +433,28 @@ export default function PharmacyDashboard() {
           <div className="pd-card">
             <h2>{pharmacy ? 'Edit Profile' : '📋 Set Up Your Pharmacy Profile'}</h2>
             <form className="pd-form single-col" onSubmit={handleProfileSubmit}>
-
               <div className="pd-form-group">
                 <label>Pharmacy Name</label>
                 <input
-                  type="text"
-                  placeholder="e.g. Green Cross Pharmacy"
+                  type="text" placeholder="e.g. Green Cross Pharmacy"
                   value={profileForm.pharmacy_name}
                   onChange={e => setProfileForm({ ...profileForm, pharmacy_name: e.target.value })}
                   required
                 />
               </div>
-
               <div className="pd-form-group">
                 <label>Location / Address</label>
                 <input
-                  type="text"
-                  placeholder="e.g. 45 Main Road, Dhaka"
+                  type="text" placeholder="e.g. 45 Main Road, Dhaka"
                   value={profileForm.location}
                   onChange={e => setProfileForm({ ...profileForm, location: e.target.value })}
                   required
                 />
               </div>
-
               <div className="pd-form-group">
                 <label>Phone Number</label>
                 <input
-                  type="text"
-                  placeholder="e.g. 01712345678"
+                  type="text" placeholder="e.g. 01712345678"
                   value={profileForm.phone}
                   onChange={handlePhoneChange}
                   onBlur={() => setPhoneTouched(true)}
@@ -282,41 +462,23 @@ export default function PharmacyDashboard() {
                   className={phoneError ? 'input-error' : ''}
                   required
                 />
-                {/* live error hint */}
                 {phoneError && (
                   <span className="pd-field-error">
                     Must start with 01 and be exactly 11 digits
                   </span>
                 )}
-                {/* live success hint */}
                 {phoneTouched && isValidPhone(profileForm.phone) && (
-                  <span className="pd-field-success">
-                    ✓ Valid phone number
-                  </span>
+                  <span className="pd-field-success">✓ Valid phone number</span>
                 )}
-                {/* character counter */}
-                <span className="pd-field-hint">
-                  {profileForm.phone.length}/11 digits
-                </span>
+                <span className="pd-field-hint">{profileForm.phone.length}/11 digits</span>
               </div>
-
               <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                <button
-                  className="pd-btn-primary"
-                  type="submit"
-                  disabled={profileSaving}
-                >
+                <button className="pd-btn-primary" type="submit" disabled={profileSaving}>
                   {profileSaving ? 'Saving...' : 'Save Profile'}
                 </button>
                 {editingProfile && (
-                  <button
-                    type="button"
-                    className="pd-btn-cancel"
-                    onClick={() => {
-                      setEditingProfile(false);
-                      setPhoneTouched(false);
-                    }}
-                  >
+                  <button type="button" className="pd-btn-cancel"
+                    onClick={() => { setEditingProfile(false); setPhoneTouched(false); }}>
                     Cancel
                   </button>
                 )}
@@ -328,18 +490,15 @@ export default function PharmacyDashboard() {
           <div className="pd-card">
             <div className="pd-section-header">
               <h2>🏥 {pharmacy.pharmacy_name}</h2>
-              <button
-                className="pd-edit-btn"
-                onClick={() => {
-                  setProfileForm({
-                    pharmacy_name: pharmacy.pharmacy_name,
-                    location: pharmacy.location,
-                    phone: pharmacy.phone,
-                  });
-                  setPhoneTouched(false);
-                  setEditingProfile(true);
-                }}
-              >
+              <button className="pd-edit-btn" onClick={() => {
+                setProfileForm({
+                  pharmacy_name: pharmacy.pharmacy_name,
+                  location: pharmacy.location,
+                  phone: pharmacy.phone,
+                });
+                setPhoneTouched(false);
+                setEditingProfile(true);
+              }}>
                 Edit Profile
               </button>
             </div>
@@ -356,7 +515,7 @@ export default function PharmacyDashboard() {
           </div>
         )}
 
-        {/* ── Tabs + Content (only when profile exists) ── */}
+        {/* ── Tabs ── */}
         {pharmacy && !editingProfile && (
           <>
             <div className="pd-tabs">
@@ -368,9 +527,14 @@ export default function PharmacyDashboard() {
               </button>
               <button
                 className={`pd-tab ${tab === 'orders' ? 'active' : ''}`}
-                onClick={() => setTab('orders')}
+                onClick={() => { setTab('orders'); setSelectedOrder(null); }}
               >
                 📦 Orders
+                {orders.filter(o => o.status === 'pending').length > 0 && (
+                  <span className="pd-tab-count">
+                    {orders.filter(o => o.status === 'pending').length}
+                  </span>
+                )}
               </button>
             </div>
 
@@ -383,7 +547,6 @@ export default function PharmacyDashboard() {
                     + Add Medicine
                   </button>
                 </div>
-
                 {medLoading ? (
                   <p style={{ fontFamily: 'DM Sans, sans-serif', color: '#7f8c9a' }}>
                     Loading medicines...
@@ -415,22 +578,14 @@ export default function PharmacyDashboard() {
                             <td>{med.stock}</td>
                             <td>৳{Number(med.price).toFixed(2)}</td>
                             <td>
-                              <button
-                                className="pd-btn-edit"
-                                onClick={() => {
-                                  setEditMed(med);
-                                  setEditForm({
-                                    stock: String(med.stock),
-                                    price: String(med.price),
-                                  });
-                                }}
-                              >
+                              <button className="pd-btn-edit" onClick={() => {
+                                setEditMed(med);
+                                setEditForm({ stock: String(med.stock), price: String(med.price) });
+                              }}>
                                 Edit
                               </button>
-                              <button
-                                className="pd-btn-danger"
-                                onClick={() => handleDeleteMedicine(med.id)}
-                              >
+                              <button className="pd-btn-danger"
+                                onClick={() => handleDeleteMedicine(med.id)}>
                                 Delete
                               </button>
                             </td>
@@ -446,7 +601,22 @@ export default function PharmacyDashboard() {
             {/* ══ ORDERS TAB ══ */}
             {tab === 'orders' && (
               <div className="pd-card">
-                <h2>Incoming Orders</h2>
+                <div className="pd-section-header" style={{ marginBottom: 20 }}>
+                  <h2>
+                    {selectedOrder
+                      ? `Order #${selectedOrder.id} — Details`
+                      : 'Incoming Orders'}
+                  </h2>
+                  {selectedOrder && (
+                    <button
+                      className="pd-btn-cancel"
+                      onClick={() => setSelectedOrder(null)}
+                    >
+                      ← All Orders
+                    </button>
+                  )}
+                </div>
+
                 {ordersLoading ? (
                   <p style={{ fontFamily: 'DM Sans, sans-serif', color: '#7f8c9a' }}>
                     Loading orders...
@@ -456,45 +626,10 @@ export default function PharmacyDashboard() {
                     <div className="pd-empty-icon">📦</div>
                     <p>No orders yet.</p>
                   </div>
+                ) : selectedOrder ? (
+                  <OrderDetail order={selectedOrder} />
                 ) : (
-                  <div className="pd-table-wrap">
-                    <table className="pd-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Customer</th>
-                          <th>Total</th>
-                          <th>Delivery</th>
-                          <th>Status</th>
-                          <th>Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orders.map(order => (
-                          <tr key={order.id}>
-                            <td>#{order.id}</td>
-                            <td>
-                              <strong>{order.customer_name}</strong>
-                              <br />
-                              <span style={{ fontSize: '0.8rem', color: '#7f8c9a' }}>
-                                {order.customer_email}
-                              </span>
-                            </td>
-                            <td>৳{Number(order.total_price).toFixed(2)}</td>
-                            <td style={{ textTransform: 'capitalize' }}>{order.delivery_type}</td>
-                            <td>
-                              <span className={`pd-badge ${order.status}`}>
-                                {order.status}
-                              </span>
-                            </td>
-                            <td style={{ fontSize: '0.85rem', color: '#7f8c9a' }}>
-                              {new Date(order.created_at).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <OrderList />
                 )}
               </div>
             )}
@@ -510,57 +645,39 @@ export default function PharmacyDashboard() {
             <form className="pd-form" onSubmit={handleAddMedicine}>
               <div className="pd-form-group">
                 <label>Medicine Name</label>
-                <input
-                  type="text" placeholder="e.g. Napa"
+                <input type="text" placeholder="e.g. Napa"
                   value={addForm.name}
-                  onChange={e => setAddForm({ ...addForm, name: e.target.value })}
-                  required
-                />
+                  onChange={e => setAddForm({ ...addForm, name: e.target.value })} required />
               </div>
               <div className="pd-form-group">
                 <label>Generic Name</label>
-                <input
-                  type="text" placeholder="e.g. Paracetamol"
+                <input type="text" placeholder="e.g. Paracetamol"
                   value={addForm.generic_name}
-                  onChange={e => setAddForm({ ...addForm, generic_name: e.target.value })}
-                  required
-                />
+                  onChange={e => setAddForm({ ...addForm, generic_name: e.target.value })} required />
               </div>
               <div className="pd-form-group">
                 <label>Company</label>
-                <input
-                  type="text" placeholder="e.g. Beximco"
+                <input type="text" placeholder="e.g. Beximco"
                   value={addForm.company}
-                  onChange={e => setAddForm({ ...addForm, company: e.target.value })}
-                  required
-                />
+                  onChange={e => setAddForm({ ...addForm, company: e.target.value })} required />
               </div>
               <div className="pd-form-group">
                 <label>Category</label>
-                <input
-                  type="text" placeholder="e.g. Analgesic"
+                <input type="text" placeholder="e.g. Analgesic"
                   value={addForm.category}
-                  onChange={e => setAddForm({ ...addForm, category: e.target.value })}
-                  required
-                />
+                  onChange={e => setAddForm({ ...addForm, category: e.target.value })} required />
               </div>
               <div className="pd-form-group">
                 <label>Stock</label>
-                <input
-                  type="number" min="0" placeholder="e.g. 100"
+                <input type="number" min="0" placeholder="e.g. 100"
                   value={addForm.stock}
-                  onChange={e => setAddForm({ ...addForm, stock: e.target.value })}
-                  required
-                />
+                  onChange={e => setAddForm({ ...addForm, stock: e.target.value })} required />
               </div>
               <div className="pd-form-group">
                 <label>Price (৳)</label>
-                <input
-                  type="number" min="0" step="0.01" placeholder="e.g. 12.50"
+                <input type="number" min="0" step="0.01" placeholder="e.g. 12.50"
                   value={addForm.price}
-                  onChange={e => setAddForm({ ...addForm, price: e.target.value })}
-                  required
-                />
+                  onChange={e => setAddForm({ ...addForm, price: e.target.value })} required />
               </div>
               <div className="pd-modal-actions pd-form-group full-width">
                 <button type="button" className="pd-btn-cancel" onClick={() => setShowAddModal(false)}>
@@ -583,21 +700,15 @@ export default function PharmacyDashboard() {
             <form className="pd-form" onSubmit={handleEditMedicine}>
               <div className="pd-form-group">
                 <label>Stock</label>
-                <input
-                  type="number" min="0"
+                <input type="number" min="0"
                   value={editForm.stock}
-                  onChange={e => setEditForm({ ...editForm, stock: e.target.value })}
-                  required
-                />
+                  onChange={e => setEditForm({ ...editForm, stock: e.target.value })} required />
               </div>
               <div className="pd-form-group">
                 <label>Price (৳)</label>
-                <input
-                  type="number" min="0" step="0.01"
+                <input type="number" min="0" step="0.01"
                   value={editForm.price}
-                  onChange={e => setEditForm({ ...editForm, price: e.target.value })}
-                  required
-                />
+                  onChange={e => setEditForm({ ...editForm, price: e.target.value })} required />
               </div>
               <div className="pd-modal-actions pd-form-group full-width">
                 <button type="button" className="pd-btn-cancel" onClick={() => setEditMed(null)}>

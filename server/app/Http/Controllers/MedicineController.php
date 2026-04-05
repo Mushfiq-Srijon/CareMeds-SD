@@ -20,7 +20,7 @@ class MedicineController extends Controller
         return response()->json($medicines);
     }
 
-    // ✅ NEW — Task 5: GET /api/medicines/{id}
+    //  5: GET /api/medicines/{id}
     public function show($id)
     {
         $medicine = DB::selectOne(
