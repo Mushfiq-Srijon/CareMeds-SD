@@ -347,12 +347,24 @@
   margin-left: 4px;
 }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE (TASK 3 FINAL) ── */
 @media (max-width: 768px) {
-  .home-header-inner { padding: 0 24px; flex-direction: column; align-items: flex-start; }
+  .home-header-inner { 
+    padding: 0 24px; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 24px;
+  }
   .home-search-wrap  { min-width: 100%; width: 100%; }
   .home-body         { padding: 32px 24px 60px; }
-  .med-grid          { grid-template-columns: 1fr; }
-  .pagination-row    { gap: 12px; }
-  .page-btn          { padding: 10px 18px; font-size: 13px; }
+  
+  /* Force 1 Column on Mobile */
+  .med-grid { 
+    grid-template-columns: 1fr !important; 
+    gap: 16px;
+  }
+  
+  .home-title { font-size: 32px; }
+  .pagination-row { gap: 12px; }
+  .page-btn { padding: 10px 18px; font-size: 13px; }
 }
