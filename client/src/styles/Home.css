@@ -219,22 +219,26 @@
   flex: 1;
 }
 
+/* --- Home.css Medicine Name Sections --- */
+
 .med-name {
   font-family: 'Raleway', sans-serif;
   font-size: 20px;
-  font-weight: 700;
-  color: #0a2342;
-  margin-bottom: 4px;
+  /* UI Garho kora (Font Weight) */
+  font-weight: 900 !important; 
+  /* UI Garho kora (Font Color Intensity) */
+  color: #050e18 !important; /* Original: #0a2342; Eita arektu dark blackish blue */
+  margin-bottom: 2px;
   line-height: 1.2;
 }
 
 .med-generic {
-  font-size: 13px;
-  color: #8899aa;
-  font-weight: 300;
+  font-size: 13.5px;
+  /* UI Garho kora (Generic Name arektu readable kora) */
+  color: #5d6d7e !important; /* Original: #8899aa; Original-ta ektu beshi halka grey chilo */
+  font-weight: 500 !important; /* Agey point-4 chilo, arektu thick kora holo */
   margin-bottom: 18px;
 }
-
 .med-meta {
   display: flex;
   flex-direction: column;
