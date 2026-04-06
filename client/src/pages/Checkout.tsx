@@ -28,10 +28,11 @@ function CheckoutForm() {
   const [loading, setLoading] = useState(true);
   const [placingOrder, setPlacingOrder] = useState(false);
   const [deliveryType, setDeliveryType] = useState<"home_delivery" | "pickup">("home_delivery");
-  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "cod">("stripe");
+  const [paymentMethod, setPaymentMethod] = useState<"stripe" | "cod" | "bkash" | "nagad">("cod");
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [mfsNumber, setMfsNumber] = useState(""); // bKash/Nagad number-er jonno state
 
   const fetchCart = async () => {
     try {
@@ -43,333 +44,155 @@ function CheckoutForm() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
+  useEffect(() => { fetchCart(); }, []);
 
   const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryCharge = deliveryType === "home_delivery" ? 50 : 0;
   const grandTotal = totalPrice + deliveryCharge;
 
-  const isValidPhone = (value: string) => /^01\d{9}$/.test(value);
-
   const placeOrder = async () => {
     if (!customerName || !phone || !address) return toast.error("Fill all fields");
-    if (!isValidPhone(phone)) return toast.error("Please enter a valid phone number (11 digits, starts with 01)");
-    if (cartItems.length === 0) return toast.error("Cart is empty");
+    
+    // bKash/Nagad select korle number check
+    if ((paymentMethod === "bkash" || paymentMethod === "nagad") && !mfsNumber) {
+      return toast.error(`Please enter your ${paymentMethod} number`);
+    }
 
     const pharmacyId = cartItems[0]?.pharmacy_id;
-    if (!pharmacyId) return toast.error("Could not determine pharmacy. Please try again.");
-
     setPlacingOrder(true);
 
     try {
-      // ── COD path ──
-      if (paymentMethod === "cod") {
-        const data = await apiClient.post("/api/orders", {
+      let data;
+      if (paymentMethod !== "stripe") {
+        data = await apiClient.post("/api/orders", {
           pharmacy_id: pharmacyId,
           delivery_type: deliveryType,
           recipient_name: customerName,
           phone,
           address,
-          payment_type: "cod",
-          items: cartItems.map(item => ({
-            medicine_id: item.medicine_id,
-            quantity: item.quantity
-          }))
+          payment_type: paymentMethod,
+          mfs_number: mfsNumber, // Backend-e number pathano
+          items: cartItems.map(item => ({ medicine_id: item.medicine_id, quantity: item.quantity }))
         });
-        await apiClient.clearCart();
-        toast.success("Order placed! Pay on delivery.");
-        navigate(`/invoice/${data.order_id}`);
-        return;
-      }
+      } else {
+        if (!stripe || !elements) return;
+        const intentRes = await apiClient.post("/api/payment/create-intent", { amount: grandTotal });
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) return;
 
-      // ── Stripe path ──
-      if (!stripe || !elements) {
-        toast.error("Stripe not loaded yet. Please wait.");
-        setPlacingOrder(false);
-        return;
-      }
-
-      const intentRes = await apiClient.post("/api/payment/create-intent", {
-        amount: grandTotal,
-      });
-      const { client_secret, payment_intent_id } = intentRes;
-
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        toast.error("Card element not found");
-        setPlacingOrder(false);
-        return;
-      }
-
-      const { error, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: { name: customerName },
-        },
-      });
-
-      if (error) {
-        toast.error(error.message || "Payment failed");
-        setPlacingOrder(false);
-        return;
-      }
-
-      if (paymentIntent?.status === "succeeded") {
-        const data = await apiClient.post("/api/orders", {
-          pharmacy_id: pharmacyId,
-          delivery_type: deliveryType,
-          recipient_name: customerName,
-          phone,
-          address,
-          payment_type: "stripe",
-          stripe_payment_intent_id: payment_intent_id,
-          items: cartItems.map(item => ({
-            medicine_id: item.medicine_id,
-            quantity: item.quantity
-          }))
+        const { error, paymentIntent } = await stripe.confirmCardPayment(intentRes.client_secret, {
+          payment_method: { card: cardElement, billing_details: { name: customerName } },
         });
-        await apiClient.clearCart();
-        toast.success("Payment successful! Order placed.");
-        navigate(`/invoice/${data.order_id}`);
+
+        if (error) throw new Error(error.message);
+        if (paymentIntent?.status === "succeeded") {
+          data = await apiClient.post("/api/orders", {
+            pharmacy_id: pharmacyId,
+            delivery_type: deliveryType,
+            recipient_name: customerName,
+            phone,
+            address,
+            payment_type: "stripe",
+            stripe_payment_intent_id: intentRes.payment_intent_id,
+            items: cartItems.map(item => ({ medicine_id: item.medicine_id, quantity: item.quantity }))
+          });
+        }
       }
 
-    } catch (error: any) {
-      toast.error(error?.message || "Failed to place order");
+      if (data) {
+        await apiClient.clearCart();
+        toast.success("Order successful!");
+        const finalId = data.order_id || data.id; 
+        navigate(`/invoice/${finalId}`);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setPlacingOrder(false);
     }
-
-    setPlacingOrder(false);
   };
 
-  if (loading) return (
-    <div className="checkout-loading">
-      <Spinner animation="border" />
-      <span>Loading your order…</span>
-    </div>
-  );
-
-  if (cartItems.length === 0) return (
-    <div className="checkout-empty">
-      <span className="checkout-empty-icon">🛒</span>
-      <p>Your cart is empty</p>
-    </div>
-  );
+  if (loading) return <div className="checkout-loading"><Spinner animation="border" /></div>;
 
   return (
     <div className="checkout-root">
-
-      {/* ── HEADER ── */}
       <div className="checkout-header">
         <div className="checkout-header-inner">
-          <span className="checkout-eyebrow">Almost there</span>
+          <span className="checkout-eyebrow">Review your details</span>
           <h1 className="checkout-title">Checkout</h1>
-          <p className="checkout-subtitle">Review your order and confirm your details below.</p>
         </div>
       </div>
 
-      {/* ── BODY ── */}
       <div className="checkout-body">
         <div className="checkout-grid">
-
-          {/* LEFT – form */}
           <div className="checkout-left">
-
-            {/* Customer Info */}
             <div className="co-card">
-              <div className="co-card-heading">
-                <div className="co-card-icon">👤</div>
-                <h3>Customer Information</h3>
-              </div>
-
-              <div className="co-field">
-                <label>Full Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Mushfiqur Rahman"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
-              </div>
-
-              <div className="co-field">
-                <label>Phone Number</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 017XXXXXXXX"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-
-              <div className="co-field">
-                <label>Delivery Address</label>
-                <textarea
-                  placeholder="Enter your full delivery address…"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  rows={3}
-                />
-              </div>
+              <div className="co-card-heading"><div className="co-card-icon">👤</div><h3>Customer Information</h3></div>
+              <div className="co-field"><label>Full Name</label><input type="text" value={customerName} onChange={e => setCustomerName(e.target.value)} /></div>
+              <div className="co-field"><label>Phone Number</label><input type="text" value={phone} onChange={e => setPhone(e.target.value)} /></div>
+              <div className="co-field"><label>Address</label><textarea value={address} onChange={e => setAddress(e.target.value)} rows={2} /></div>
             </div>
 
-            {/* Delivery Method */}
             <div className="co-card">
-              <div className="co-card-heading">
-                <div className="co-card-icon">🚚</div>
-                <h3>Delivery Method</h3>
-              </div>
-
+              <div className="co-card-heading"><div className="co-card-icon">🚚</div><h3>Delivery Method</h3></div>
               <div className="delivery-options">
-                <div
-                  className={`delivery-option ${deliveryType === "home_delivery" ? "selected" : ""}`}
-                  onClick={() => setDeliveryType("home_delivery")}
-                >
-                  <div className="delivery-radio" />
-                  <div className="delivery-info">
-                    <div className="delivery-label">Home Delivery</div>
-                    <div className="delivery-sub">Delivered to your door</div>
-                  </div>
-                  <div className="delivery-price">+50 BDT</div>
+                <div className={`delivery-option ${deliveryType === "home_delivery" ? "selected" : ""}`} onClick={() => setDeliveryType("home_delivery")}>
+                  <div className="delivery-radio" /><div className="delivery-info"><div className="delivery-label">Home Delivery</div></div>
                 </div>
-
-                <div
-                  className={`delivery-option ${deliveryType === "pickup" ? "selected" : ""}`}
-                  onClick={() => setDeliveryType("pickup")}
-                >
-                  <div className="delivery-radio" />
-                  <div className="delivery-info">
-                    <div className="delivery-label">Self Pickup</div>
-                    <div className="delivery-sub">Collect from the pharmacy</div>
-                  </div>
-                  <div className="delivery-price free">Free</div>
+                <div className={`delivery-option ${deliveryType === "pickup" ? "selected" : ""}`} onClick={() => setDeliveryType("pickup")}>
+                  <div className="delivery-radio" /><div className="delivery-info"><div className="delivery-label">Self Pickup</div></div>
                 </div>
               </div>
             </div>
 
-            {/* Payment Method */}
             <div className="co-card">
-              <div className="co-card-heading">
-                <div className="co-card-icon">💳</div>
-                <h3>Payment Method</h3>
-              </div>
-
-              <div className="delivery-options">
-                <div
-                  className={`delivery-option ${paymentMethod === "stripe" ? "selected" : ""}`}
-                  onClick={() => setPaymentMethod("stripe")}
-                >
-                  <div className="delivery-radio" />
-                  <div className="delivery-info">
-                    <div className="delivery-label">Pay by Card</div>
-                    <div className="delivery-sub">Visa, Mastercard via Stripe</div>
-                  </div>
-                  <div className="delivery-price">Secure</div>
+              <div className="co-card-heading"><div className="co-card-icon">💳</div><h3>Payment Method</h3></div>
+              <div className="payment-grid-custom">
+                <div className={`delivery-option ${paymentMethod === "bkash" ? "selected" : ""}`} onClick={() => setPaymentMethod("bkash")}>
+                  <div className="delivery-radio" /><div className="delivery-info"><div className="delivery-label">bKash</div></div>
                 </div>
-
-                <div
-                  className={`delivery-option ${paymentMethod === "cod" ? "selected" : ""}`}
-                  onClick={() => setPaymentMethod("cod")}
-                >
-                  <div className="delivery-radio" />
-                  <div className="delivery-info">
-                    <div className="delivery-label">Cash on Delivery</div>
-                    <div className="delivery-sub">Pay when you receive</div>
-                  </div>
-                  <div className="delivery-price free">COD</div>
+                <div className={`delivery-option ${paymentMethod === "nagad" ? "selected" : ""}`} onClick={() => setPaymentMethod("nagad")}>
+                  <div className="delivery-radio" /><div className="delivery-info"><div className="delivery-label">Nagad</div></div>
+                </div>
+                <div className={`delivery-option ${paymentMethod === "stripe" ? "selected" : ""}`} onClick={() => setPaymentMethod("stripe")}>
+                  <div className="delivery-radio" /><div className="delivery-info"><div className="delivery-label">Card Payment</div></div>
+                </div>
+                <div className={`delivery-option ${paymentMethod === "cod" ? "selected" : ""}`} onClick={() => setPaymentMethod("cod")}>
+                  <div className="delivery-radio" /><div className="delivery-info"><div className="delivery-label">Cash on Delivery</div></div>
                 </div>
               </div>
+
+              {/* Dynamic bKash/Nagad Number Field */}
+              {(paymentMethod === "bkash" || paymentMethod === "nagad") && (
+                <div className="co-field" style={{ marginTop: "20px" }}>
+                  <label>{paymentMethod === "bkash" ? "bKash" : "Nagad"} Number</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 017XXXXXXXX" 
+                    value={mfsNumber} 
+                    onChange={e => setMfsNumber(e.target.value)} 
+                    className="mfs-input"
+                  />
+                </div>
+              )}
 
               {paymentMethod === "stripe" && (
-                <div className="co-field" style={{ marginTop: "16px" }}>
+                <div className="co-field" style={{ marginTop: "20px" }}>
                   <label>Card Details</label>
-                  <div className="stripe-card-wrapper">
-                    <CardElement options={{
-                      style: {
-                        base: {
-                          fontSize: "16px",
-                          color: "#1a1a1a",
-                          "::placeholder": { color: "#9ca3af" },
-                        },
-                        invalid: { color: "#ef4444" },
-                      },
-                    }} />
-                  </div>
-                  <p className="stripe-note">
-                    Test card: 4242 4242 4242 4242 · Any future date · Any CVC
-                  </p>
+                  <div className="stripe-card-wrapper"><CardElement /></div>
                 </div>
               )}
             </div>
-
           </div>
 
-          {/* RIGHT – order summary */}
           <div className="checkout-right">
             <div className="co-card co-summary">
-              <div className="co-card-heading">
-                <div className="co-card-icon">🧾</div>
-                <h3>Order Summary</h3>
-              </div>
-
-              <div className="summary-items">
-                {cartItems.map(item => (
-                  <div className="summary-item" key={item.cart_id}>
-                    <div className="summary-item-left">
-                      <div className="summary-item-name">{item.name}</div>
-                      <div className="summary-item-qty">× {item.quantity}</div>
-                    </div>
-                    <div className="summary-item-total">{item.price * item.quantity} BDT</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="summary-divider" />
-
-              <div className="summary-row">
-                <span>Subtotal</span>
-                <span>{totalPrice} BDT</span>
-              </div>
-              <div className="summary-row">
-                <span>Delivery</span>
-                <span>{deliveryCharge === 0 ? "Free" : `${deliveryCharge} BDT`}</span>
-              </div>
-
-              <div className="summary-divider" />
-
-              <div className="summary-grand">
-                <span>Grand Total</span>
-                <span className="grand-value">{grandTotal} <small>BDT</small></span>
-              </div>
-
-              {paymentMethod === "stripe" && (
-                <p className="stripe-usd-note">
-                  ≈ ${(grandTotal / 110).toFixed(2)} USD will be charged to your card
-                </p>
-              )}
-
-              <button
-                className="place-order-btn"
-                onClick={placeOrder}
-                disabled={placingOrder}
-              >
-                {placingOrder ? (
-                  <>
-                    <Spinner animation="border" size="sm" />
-                    {paymentMethod === "stripe" ? " Processing payment…" : " Placing Order…"}
-                  </>
-                ) : (
-                  <>
-                    <svg fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                    {paymentMethod === "stripe" ? "Pay & Place Order" : "Place Order (COD)"}
-                  </>
-                )}
+              <div className="summary-grand"><span>Total</span><span className="grand-value">{grandTotal} <small>BDT</small></span></div>
+              <button className="place-order-btn" onClick={placeOrder} disabled={placingOrder}>
+                {placingOrder ? "Processing..." : "Confirm Order"}
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -377,9 +200,5 @@ function CheckoutForm() {
 }
 
 export default function Checkout() {
-  return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm />
-    </Elements>
-  );
+  return ( <Elements stripe={stripePromise}><CheckoutForm /></Elements> );
 }
