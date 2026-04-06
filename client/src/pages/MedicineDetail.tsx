@@ -69,9 +69,9 @@ export default function MedicineDetail() {
       <div className="md-hero">
         <div className="md-hero-overlay" />
         <div className="md-hero-content">
-          <button className="md-back-btn" onClick={() => navigate('/home')}>
-            ← Back
-          </button>
+          <button className="md-back-btn" onClick={() => navigate('/home')} title="Go Back">
+  <span className="back-icon">←</span>
+</button>
           <div className="md-category-badge">{medicine.category}</div>
           <h1>{medicine.name}</h1>
           <p className="md-generic">{medicine.generic_name}</p>
