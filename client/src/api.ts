@@ -14,8 +14,10 @@ class ApiClient {
     });
   }
 
+  // Get auth headers with token
+  // Checks both localStorage (normal login) and sessionStorage (remember me)
   private getAuthConfig() {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
     if (!token) return {};
     return {
       headers: { Authorization: `Bearer ${token}` },
@@ -62,17 +64,17 @@ class ApiClient {
     }
   }
 
-  // Medicines
+  // ─── Medicines ───────────────────────────────────────────────
   async getMedicines() {
     return this.get('/api/medicines');
   }
 
-  //  5: Get single medicine with pharmacy info
+  // Get single medicine with pharmacy info (Oni)
   async getMedicineById(id: number) {
     return this.get(`/api/medicines/${id}`);
   }
 
-  // Cart
+  // ─── Cart ─────────────────────────────────────────────────────
   async addToCart(medicineId: number, quantity: number = 1) {
     return this.post('/api/cart/add', { medicine_id: medicineId, quantity });
   }
@@ -100,6 +102,7 @@ class ApiClient {
     return this.delete('/api/cart/clear');
   }
 
+  // ─── Auth ─────────────────────────────────────────────────────
   async forgotPassword(email: string) {
     return this.post('/api/forgot-password', { email });
   }
@@ -108,11 +111,57 @@ class ApiClient {
     return this.post('/api/reset-password', { email, token, password });
   }
 
-  // 3: My Orders
+  // Change password from profile page (Sabikun)
+  async changePassword(currentPassword: string, newPassword: string) {
+    return this.post('/api/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword
+    });
+  }
+
+  // ─── Orders ───────────────────────────────────────────────────
+  // Get logged-in customer's orders (Oni)
   async getMyOrders() {
     return this.get('/api/my-orders');
   }
 
+  // ─── Pharmacy ─────────────────────────────────────────────────
+  // Get pharmacy profile (Oni)
+  async getPharmacyProfile() {
+    return this.get('/api/pharmacy/profile');
+  }
+
+  // Setup pharmacy details (Oni)
+  async setupPharmacy(data: object) {
+    return this.post('/api/pharmacy/setup', data);
+  }
+
+  // Get medicines belonging to this pharmacy (Oni)
+  async getPharmacyMedicines() {
+    return this.get('/api/pharmacy/medicines');
+  }
+
+  // Add a new medicine (Oni)
+  async addMedicine(data: object) {
+    return this.post('/api/medicines', data);
+  }
+
+  // Update a medicine (Oni)
+  async updateMedicine(id: number, data: object) {
+    return this.put(`/api/medicines/${id}`, data);
+  }
+
+  // Delete a medicine (Oni)
+  async deleteMedicine(id: number) {
+    return this.delete(`/api/medicines/${id}`);
+  }
+
+  // Get incoming orders for pharmacy (Oni)
+  async getPharmacyOrders() {
+    return this.get('/api/pharmacy/orders');
+  }
+
+  // ─── Error Handler ────────────────────────────────────────────
   handleError(error: any) {
     if (error.response) {
       console.error(`API Error: ${error.response.status}`, error.response.data);

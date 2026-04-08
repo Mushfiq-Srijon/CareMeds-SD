@@ -8,19 +8,15 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
+  // Handles normal email/password registration
   const handleRegister = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    // Validation
-    if (!role) {
-      alert("Please select a role");
-      return;
-    }
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+    if (!role) { alert("Please select a role"); return; }
+    if (password !== confirmPassword) { alert("Passwords do not match"); return; }
 
     try {
       const response = await fetch("http://localhost:8000/api/register", {
@@ -28,12 +24,9 @@ function Register() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        alert("Registration Success");
-        console.log("Success:", data);
+        alert("Registration successful! Please check your email to verify your account.");
         navigate("/login");
       } else {
         alert("Registration Failed: " + (data.message || "Invalid input or already registered"));
@@ -44,125 +37,152 @@ function Register() {
     }
   };
 
+   // Handles Google OAuth login
+  const handleGoogleLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/auth/google");
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Could not get Google login URL");
+      }
+    } catch (error) {
+      alert("Server error. Please try again.");
+    }
+  };
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.title}>Register</h2>
         <form onSubmit={handleRegister}>
 
-        {/* Name */}
-        <div style={styles.inputGroup}>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={styles.input}
-            placeholder=" "
-          />
-          <label
-            style={{
+          {/* Name */}
+          <div style={styles.inputGroup}>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              style={styles.input}
+              placeholder=" "
+            />
+            <label style={{
               ...styles.label,
               top: name ? "-10px" : "50%",
               fontSize: name ? "12px" : "16px",
               color: name ? "#4da6ff" : "#e0e0e0",
-            }}
-          >
-            Name
-          </label>
-        </div>
+            }}>
+              Name
+            </label>
+          </div>
 
-        {/* Email */}
-        <div style={styles.inputGroup}>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
-            placeholder=" "
-          />
-          <label
-            style={{
+          {/* Email */}
+          <div style={styles.inputGroup}>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={styles.input}
+              placeholder=" "
+            />
+            <label style={{
               ...styles.label,
               top: email ? "-10px" : "50%",
               fontSize: email ? "12px" : "16px",
               color: email ? "#4da6ff" : "#e0e0e0",
-            }}
-          >
-            Email
-          </label>
-        </div>
+            }}>
+              Email
+            </label>
+          </div>
 
-        {/* Password */}
-        <div style={styles.inputGroup}>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-            placeholder=" "
-          />
-          <label
-            style={{
+          {/* Password */}
+          <div style={styles.inputGroup}>
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ ...styles.input, paddingRight: "45px" }}
+              placeholder=" "
+            />
+            <label style={{
               ...styles.label,
               top: password ? "-10px" : "50%",
               fontSize: password ? "12px" : "16px",
               color: password ? "#4da6ff" : "#e0e0e0",
-            }}
-          >
-            Password
-          </label>
-        </div>
+            }}>
+              Password
+            </label>
+            <span onClick={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
 
-        {/* Confirm Password */}
-        <div style={styles.inputGroup}>
-          <input
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            style={styles.input}
-            placeholder=" "
-          />
-          <label
-            style={{
+          {/* Confirm Password */}
+          <div style={styles.inputGroup}>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              style={{ ...styles.input, paddingRight: "45px" }}
+              placeholder=" "
+            />
+            <label style={{
               ...styles.label,
               top: confirmPassword ? "-10px" : "50%",
               fontSize: confirmPassword ? "12px" : "16px",
               color: confirmPassword ? "#4da6ff" : "#e0e0e0",
-            }}
-          >
-            Confirm Password
-          </label>
-        </div>
+            }}>
+              Confirm Password
+            </label>
+            <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+              {showConfirmPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
 
-        {/* Role Selection */}
-        <div style={{ marginBottom: "30px" }}>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            style={styles.select}
-          >
-            <option value="">Select Role</option>
-            <option value="customer">Customer</option>
-            <option value="pharmacy">Pharmacy</option>
-            <option value="rider">Rider</option>
-          </select>
-        </div>
+          {/* Role Selection */}
+          <div style={{ marginBottom: "30px" }}>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={styles.select}
+            >
+              <option value="">Select Role</option>
+              <option value="customer">Customer</option>
+              <option value="pharmacy">Pharmacy</option>
+              <option value="rider">Rider</option>
+            </select>
+          </div>
 
-        {/* Register Button */}
+          {/* Register Button */}
           <button type="submit" style={styles.button}>
             Register
           </button>
         </form>
 
+        {/* Divider between email register and Google register */}
+        <div style={styles.divider}>
+          <span style={styles.dividerLine} />
+          <span style={styles.dividerText}>or</span>
+          <span style={styles.dividerLine} />
+        </div>
+
+        {/* Google Register Button */}
+        <button onClick={handleGoogleLogin} style={styles.googleButton}>
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google"
+            style={{ width: "20px", marginRight: "10px" }}
+          />
+          Continue with Google
+        </button>
+
         <p style={styles.loginText}>
           Already have an account?{" "}
-          <Link to="/login" style={styles.loginLink}>
-            Login
-          </Link>
+          <Link to="/login" style={styles.loginLink}>Login</Link>
         </p>
       </div>
     </div>
@@ -237,8 +257,39 @@ const styles = {
     boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
     transition: "0.3s",
   },
+  divider: {
+    display: "flex",
+    alignItems: "center",
+    margin: "20px 0",
+  },
+  dividerLine: {
+    flex: 1,
+    height: "1px",
+    background: "rgba(255,255,255,0.3)",
+  },
+  dividerText: {
+    margin: "0 10px",
+    color: "#c0d6f9",
+    fontSize: "13px",
+  },
+  googleButton: {
+    width: "100%",
+    padding: "12px",
+    border: "none",
+    borderRadius: "10px",
+    background: "#ffffff",
+    color: "#333",
+    fontWeight: "600",
+    fontSize: "15px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    marginBottom: "10px",
+  },
   loginText: {
-    marginTop: "25px",
+    marginTop: "20px",
     fontSize: "14px",
     color: "#b9dce8",
   },
@@ -246,6 +297,15 @@ const styles = {
     color: "#4da6ff",
     fontWeight: "600",
     textDecoration: "none",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    cursor: "pointer",
+    fontSize: "18px",
+    userSelect: "none",
   },
 };
 

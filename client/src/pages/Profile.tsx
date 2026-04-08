@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import ApiClient from '../api';
 import "../styles/Profile.css";
 
+const apiClient = new ApiClient();
+
 const Profile = () => {
+  const eyeStyle: React.CSSProperties = {
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    cursor: "pointer",
+    fontSize: "18px",
+    userSelect: "none",
+  };
   // Frontend State Logic
   const [user, setUser] = useState({
     name: localStorage.getItem('user_name') || "",
@@ -15,6 +27,9 @@ const Profile = () => {
   const [editData, setEditData] = useState({ ...user });
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
   const [message, setMessage] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const isValidPhone = (value: string) => /^01\d{9}$/.test(value);
 
@@ -35,7 +50,7 @@ const Profile = () => {
   };
 
   // Password Validation Logic
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (passwords.new.length < 6) {
       alert("New password must be at least 6 characters!");
       return;
@@ -44,9 +59,20 @@ const Profile = () => {
       alert("Passwords do not match!");
       return;
     }
-    setMessage("Password changed successfully!");
-    setPasswords({ current: "", new: "", confirm: "" });
-    setTimeout(() => setMessage(""), 3000);
+    if (!passwords.current) {
+      alert("Please enter your current password!");
+      return;
+    }
+
+    try {
+      await apiClient.changePassword(passwords.current, passwords.new);
+      setMessage("Password changed successfully!");
+      setPasswords({ current: "", new: "", confirm: "" });
+      setTimeout(() => setMessage(""), 3000);
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || "Failed to change password.";
+      alert(msg);
+    }
   };
 
   // Logout Logic
@@ -95,62 +121,95 @@ const Profile = () => {
           {/* 2. Edit Profile & Password Section */}
           <div className="profile-right-col">
             {isEditing && (
-  <div className="card edit-card">
-    <h3 className="section-heading">Update Details</h3>
-    
-    <div className="edit-input-group">
-      <label>NAME</label>
-      <input 
-        type="text" placeholder="Enter your name" 
-        value={editData.name} 
-        onChange={(e) => setEditData({...editData, name: e.target.value})} 
-      />
-    </div>
+              <div className="card edit-card">
+                <h3 className="section-heading">Update Details</h3>
 
-    <div className="edit-input-group">
-      <label>PHONE</label>
-      <input 
-        type="text" placeholder="Enter phone number" 
-        value={editData.phone} 
-        onChange={(e) => setEditData({...editData, phone: e.target.value})} 
-      />
-    </div>
+                <div className="edit-input-group">
+                  <label>NAME</label>
+                  <input
+                    type="text" placeholder="Enter your name"
+                    value={editData.name}
+                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  />
+                </div>
 
-    <div className="edit-input-group">
-      <label>ADDRESS</label>
-      <textarea 
-        placeholder="Enter your address" 
-        value={editData.address} 
-        onChange={(e) => setEditData({...editData, address: e.target.value})} 
-      />
-    </div>
+                <div className="edit-input-group">
+                  <label>PHONE</label>
+                  <input
+                    type="text" placeholder="Enter phone number"
+                    value={editData.phone}
+                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                  />
+                </div>
 
-    <div className="btn-row">
-      <button className="btn btn-save" onClick={handleSaveProfile}>Save Changes</button>
-      <button className="btn btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
-    </div>
-  </div>
-)}
-            
+                <div className="edit-input-group">
+                  <label>ADDRESS</label>
+                  <textarea
+                    placeholder="Enter your address"
+                    value={editData.address}
+                    onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                  />
+                </div>
+
+                <div className="btn-row">
+                  <button className="btn btn-save" onClick={handleSaveProfile}>Save Changes</button>
+                  <button className="btn btn-cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+                </div>
+              </div>
+            )}
+
 
             <div className="card">
               <h3 className="section-heading">Security</h3>
               <div className="password-fields">
-                <input 
-                  type="password" placeholder="Current Password" 
-                  value={passwords.current} 
-                  onChange={(e) => setPasswords({...passwords, current: e.target.value})} 
-                />
-                <input 
-                  type="password" placeholder="New Password" 
-                  value={passwords.new} 
-                  onChange={(e) => setPasswords({...passwords, new: e.target.value})} 
-                />
-                <input 
-                  type="password" placeholder="Confirm New Password" 
-                  value={passwords.confirm} 
-                  onChange={(e) => setPasswords({...passwords, confirm: e.target.value})} 
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    placeholder="Current Password"
+                    value={passwords.current}
+                    onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+                    style={{ paddingRight: "40px", width: "100%" }}
+                  />
+                  <span
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    style={eyeStyle}
+                  >
+                    {showCurrentPassword ? "🙈" : "👁️"}
+                  </span>
+                </div>
+
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="New Password"
+                    value={passwords.new}
+                    onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                    style={{ paddingRight: "40px", width: "100%" }}
+                  />
+                  <span
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    style={eyeStyle}
+                  >
+                    {showNewPassword ? "🙈" : "👁️"}
+                  </span>
+                </div>
+
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm New Password"
+                    value={passwords.confirm}
+                    onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                    style={{ paddingRight: "40px", width: "100%" }}
+                  />
+                  <span
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={eyeStyle}
+                  >
+                    {showConfirmPassword ? "🙈" : "👁️"}
+                  </span>
+                </div>
+
                 <button className="btn btn-password" onClick={handleChangePassword}>Change Password</button>
               </div>
             </div>

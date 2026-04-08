@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\MedicineController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PharmacyController;
@@ -13,6 +14,8 @@ use App\Http\Controllers\PharmacyController;
 // ── Public Routes ─────────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
+Route::get('/auth/google', [GoogleAuthController::class, 'redirect']);
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 
 Route::get('/medicines',     [MedicineController::class, 'index']);
 Route::get('/medicines/{id}',[MedicineController::class, 'show']); // ✅ Task 5
@@ -27,7 +30,7 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/email/resend', [EmailVerificationController::class, 'sendVerificationEmail']);
-
+ Route::post('/change-password', [AuthController::class, 'changePassword']);
     // Orders
     Route::post('/orders',   [OrderController::class, 'store']);
     Route::get('/my-orders', [OrderController::class, 'myOrders']);
@@ -39,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/clear',       [CartController::class, 'clearCart']);
     Route::get('/cart',                [CartController::class, 'getMyCart']);
     Route::get('/cart/list',           [CartController::class, 'getMyCart']);
-
+ Route::post('/auth/google/set-role', [GoogleAuthController::class, 'setRole']);
     // Pharmacy
     Route::get('/pharmacy/profile',   [PharmacyController::class, 'profile']);
     Route::post('/pharmacy/setup',    [PharmacyController::class, 'setup']);
