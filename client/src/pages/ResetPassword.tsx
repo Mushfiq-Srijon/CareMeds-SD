@@ -16,6 +16,8 @@ export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // If token or email is missing from URL, show error immediately
   if (!token || !email) {
@@ -62,10 +64,10 @@ export default function ResetPassword() {
         {/* New Password */}
         <div style={styles.inputGroup}>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
+            style={{ ...styles.input, paddingRight: "45px" }}
             placeholder=" "
           />
           <label
@@ -78,15 +80,21 @@ export default function ResetPassword() {
           >
             New Password
           </label>
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            style={styles.eyeIcon}
+          >
+            {showPassword ? "🙈" : "👁️"}
+          </span>
         </div>
 
         {/* Confirm Password */}
         <div style={styles.inputGroup}>
           <input
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            style={styles.input}
+            style={{ ...styles.input, paddingRight: "45px" }}
             placeholder=" "
           />
           <label
@@ -99,6 +107,12 @@ export default function ResetPassword() {
           >
             Confirm Password
           </label>
+          <span
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.eyeIcon}
+          >
+            {showConfirmPassword ? "🙈" : "👁️"}
+          </span>
         </div>
 
         <button
@@ -186,5 +200,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#4da6ff",
     fontWeight: "600",
     textDecoration: "none",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    cursor: "pointer",
+    fontSize: "18px",
+    userSelect: "none",
   },
 };
