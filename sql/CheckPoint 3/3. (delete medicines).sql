@@ -1,0 +1,1 @@
+DELETE FROM medicines WHERE pharmacy_id IS NULL;

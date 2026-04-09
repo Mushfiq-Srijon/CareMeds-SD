@@ -101,6 +101,7 @@ class CartController extends Controller
                                 'name'        => $item->medicine->name,
                                 'price'       => $item->medicine->price,
                                 'company'     => $item->medicine->company,
+                                'pharmacy_id' => $item->medicine->pharmacy_id,
                             ];
                         });
 

@@ -22,23 +22,20 @@ function Login() {
       const data = await response.json();
 
       if (response.ok && data.token) {
-        // Save token based on Remember Me checkbox
+        // Clear both storages first to avoid stale role conflicts
+        localStorage.clear();
+        sessionStorage.clear();
+
         if (rememberMe) {
-          // Checked → localStorage (stays after browser closes)
           localStorage.setItem("auth_token", data.token);
-          if (data.user) {
-            localStorage.setItem("user_name", data.user.name);
-            localStorage.setItem("user_id", data.user.id);
-            localStorage.setItem("user_role", data.user.role);
-          }
+          localStorage.setItem("user_name", data.user.name);
+          localStorage.setItem("user_id", data.user.id);
+          localStorage.setItem("user_role", data.user.role);
         } else {
-          // Not checked → sessionStorage (clears when tab closes)
           sessionStorage.setItem("auth_token", data.token);
-          if (data.user) {
-            sessionStorage.setItem("user_name", data.user.name);
-            sessionStorage.setItem("user_id", data.user.id);
-            sessionStorage.setItem("user_role", data.user.role);
-          }
+          sessionStorage.setItem("user_name", data.user.name);
+          sessionStorage.setItem("user_id", data.user.id);
+          sessionStorage.setItem("user_role", data.user.role);
         }
 
         if (data.user.role === "customer") navigate("/home");

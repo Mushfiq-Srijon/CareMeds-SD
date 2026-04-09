@@ -21,6 +21,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute';
+import Invoice from './pages/Invoice';
 
 function RoleRoute({ role, children }: { role: string, children: JSX.Element }) {
   const userRole = localStorage.getItem("user_role") || sessionStorage.getItem("user_role");
@@ -67,6 +68,9 @@ function App() {
 
           {/* Medicine Detail (Oni) */}
           <Route path="/medicine/:id" element={<ProtectedRoute><MedicineDetail /></ProtectedRoute>} />
+
+          {/* Invoice */}
+          <Route path="/invoice/:orderId" element={<ProtectedRoute><Invoice /></ProtectedRoute>} />
 
           {/* Role Based Pages */}
           <Route path="/pharmacy" element={<RoleRoute role="pharmacy"><PharmacyDashboard /></RoleRoute>} />

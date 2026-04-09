@@ -1,4 +1,4 @@
- <?php
+<?php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -10,18 +10,19 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PharmacyController;
+use App\Http\Controllers\SteadfastController;
 
 // ── Public Routes ─────────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 Route::get('/auth/google', [GoogleAuthController::class, 'redirect']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback']);
 
-Route::get('/medicines',     [MedicineController::class, 'index']);
-Route::get('/medicines/{id}',[MedicineController::class, 'show']); // ✅ Task 5
+Route::get('/medicines', [MedicineController::class, 'index']);
+Route::get('/medicines/{id}', [MedicineController::class, 'show']); // ✅ Task 5
 
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
-Route::post('/reset-password',  [PasswordResetController::class, 'resetPassword']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->name('verification.verify');
@@ -30,28 +31,32 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/email/resend', [EmailVerificationController::class, 'sendVerificationEmail']);
- Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
     // Orders
-    Route::post('/orders',   [OrderController::class, 'store']);
+    Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/my-orders', [OrderController::class, 'myOrders']);
 
     // Cart
-    Route::post('/cart/add',           [CartController::class, 'addToCart']);
-    Route::put('/cart/update',         [CartController::class, 'updateCart']);
+    Route::post('/cart/add', [CartController::class, 'addToCart']);
+    Route::put('/cart/update', [CartController::class, 'updateCart']);
     Route::delete('/cart/remove/{id}', [CartController::class, 'removeFromCart']);
-    Route::delete('/cart/clear',       [CartController::class, 'clearCart']);
-    Route::get('/cart',                [CartController::class, 'getMyCart']);
-    Route::get('/cart/list',           [CartController::class, 'getMyCart']);
- Route::post('/auth/google/set-role', [GoogleAuthController::class, 'setRole']);
+    Route::delete('/cart/clear', [CartController::class, 'clearCart']);
+    Route::get('/cart', [CartController::class, 'getMyCart']);
+    Route::get('/cart/list', [CartController::class, 'getMyCart']);
+    Route::post('/auth/google/set-role', [GoogleAuthController::class, 'setRole']);
     // Pharmacy
-    Route::get('/pharmacy/profile',   [PharmacyController::class, 'profile']);
-    Route::post('/pharmacy/setup',    [PharmacyController::class, 'setup']);
+    Route::get('/pharmacy/profile', [PharmacyController::class, 'profile']);
+    Route::post('/pharmacy/setup', [PharmacyController::class, 'setup']);
     Route::get('/pharmacy/medicines', [PharmacyController::class, 'medicines']);
-    Route::get('/pharmacy/orders',    [PharmacyController::class, 'orders']);
+    Route::get('/pharmacy/orders', [PharmacyController::class, 'orders']);
     Route::put('/pharmacy/orders/{id}/status', [OrderController::class, 'updateOrderStatus']);
-Route::get('/pharmacy/orders/{id}/items', [OrderController::class, 'orderItems']);
+    Route::get('/pharmacy/orders/{id}/items', [OrderController::class, 'orderItems']);
     // Medicine CRUD
-    Route::post('/medicines',        [MedicineController::class, 'store']);
-    Route::put('/medicines/{id}',    [MedicineController::class, 'update']);
+    Route::post('/medicines', [MedicineController::class, 'store']);
+    Route::put('/medicines/{id}', [MedicineController::class, 'update']);
     Route::delete('/medicines/{id}', [MedicineController::class, 'destroy']);
+    // Invoice
+    Route::get('/orders/{id}/invoice', [OrderController::class, 'invoiceData']);
+    //Steadfast
+    Route::post('/pharmacy/orders/{id}/dispatch', [SteadfastController::class, 'sendToSteadfast']);
 });
