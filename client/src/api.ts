@@ -165,12 +165,13 @@ class ApiClient {
   handleError(error: any) {
     if (error.response) {
       console.error(`API Error: ${error.response.status}`, error.response.data);
+      if (error.response.status === 404) return; // ← ADD THIS LINE — silent 404s
     } else if (error.request) {
       console.error('API Error: No response received');
     } else {
       console.error('API Error:', error.message);
     }
-    toast.error(error.message || 'Something went wrong');
+    toast.error(error.response?.data?.message || error.message || 'Something went wrong');
   }
 }
 
