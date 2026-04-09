@@ -9,15 +9,17 @@ use App\Models\Medicine;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Rider;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvoiceMail;
 
 class OrderController extends Controller
 {
     public function store(Request $request)
     {
         $request->validate([
-            'pharmacy_id'   => 'required',
+            'pharmacy_id' => 'required',
             'delivery_type' => 'required|in:home_delivery,pickup',
-            'items'         => 'required|array'
+            'items' => 'required|array'
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -38,34 +40,61 @@ class OrderController extends Controller
 
             $totalPrice += $deliveryCharge;
 
-            $rider   = Rider::inRandomOrder()->first();
+            $rider = Rider::inRandomOrder()->first();
             $riderId = $rider ? $rider->id : null;
 
             $order = Order::create([
-                'user_id'         => Auth::id(),
-                'pharmacy_id'     => $request->pharmacy_id,
-                'delivery_type'   => $request->delivery_type,
+                'user_id' => Auth::id(),
+                'pharmacy_id' => $request->pharmacy_id,
+                'delivery_type' => $request->delivery_type,
                 'delivery_charge' => $deliveryCharge,
-                'total_price'     => $totalPrice,
-                'rider_id'        => $riderId,
-                'phone'           => $request->phone,
-                'address'         => $request->address,
+                'total_price' => $totalPrice,
+                'rider_id' => $riderId,
+                'recipient_name' => $request->recipient_name,
+                'phone' => $request->phone,
+                'address' => $request->address,
             ]);
 
             foreach ($request->items as $item) {
                 $medicine = Medicine::find($item['medicine_id']);
                 OrderItem::create([
-                    'order_id'    => $order->id,
+                    'order_id' => $order->id,
                     'medicine_id' => $item['medicine_id'],
-                    'quantity'    => $item['quantity'],
-                    'price'       => $medicine->price,
+                    'quantity' => $item['quantity'],
+                    'price' => $medicine->price,
                 ]);
                 $medicine->decrement('stock', $item['quantity']);
             }
 
+            // Fetch order items for invoice
+            $invoiceItems = DB::select("
+    SELECT m.name, oi.quantity, oi.price
+    FROM order_items oi
+    JOIN medicines m ON oi.medicine_id = m.id
+    WHERE oi.order_id = ?
+", [$order->id]);
+
+            // Fetch customer info for invoice
+            $customer = DB::selectOne("SELECT name, email FROM users WHERE id = ?", [Auth::id()]);
+
+            // Build order object for invoice
+            $orderForInvoice = (object) [
+                'id' => $order->id,
+                'customer_name' => $request->recipient_name ?? $customer->name,
+                'phone' => $order->phone,
+                'address' => $order->address,
+                'delivery_type' => $order->delivery_type,
+                'delivery_charge' => $order->delivery_charge,
+                'total_price' => $order->total_price,
+                'created_at' => $order->created_at,
+            ];
+
+            // Send invoice email
+            Mail::to($customer->email)->send(new InvoiceMail($orderForInvoice, $invoiceItems));
+
             return response()->json([
-                'message'        => 'Order placed successfully',
-                'order_id'       => $order->id,
+                'message' => 'Order placed successfully',
+                'order_id' => $order->id,
                 'rider_assigned' => $riderId
             ]);
         });
@@ -76,16 +105,43 @@ class OrderController extends Controller
     {
         $user = $request->user();
 
+        // REPLACE the entire $orders = DB::select(...) block with this:
         $orders = DB::select("
-            SELECT o.*,
-                   GROUP_CONCAT(m.name SEPARATOR ', ') as medicine_names
-            FROM orders o
-            JOIN order_items oi ON o.id = oi.order_id
-            JOIN medicines m ON oi.medicine_id = m.id
-            WHERE o.user_id = ?
-            GROUP BY o.id
-            ORDER BY o.created_at DESC
-        ", [$user->id]);
+    SELECT
+        o.id,
+        o.user_id,
+        o.pharmacy_id,
+        o.rider_id,
+        o.delivery_type,
+        o.status,
+        o.consignment_id,
+        o.total_price,
+        o.delivery_charge,
+        o.phone,
+        o.address,
+        o.created_at,
+        o.updated_at,
+        GROUP_CONCAT(m.name SEPARATOR ', ') as medicine_names
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN medicines m ON oi.medicine_id = m.id
+    WHERE o.user_id = ?
+    GROUP BY
+        o.id,
+        o.user_id,
+        o.pharmacy_id,
+        o.rider_id,
+        o.delivery_type,
+        o.status,
+        o.consignment_id,
+        o.total_price,
+        o.delivery_charge,
+        o.phone,
+        o.address,
+        o.created_at,
+        o.updated_at
+    ORDER BY o.created_at DESC
+", [$user->id]);
 
         return response()->json($orders);
     }
@@ -139,7 +195,7 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'orders'  => $orders,
+            'orders' => $orders,
         ]);
     }
 
@@ -187,7 +243,7 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'items'   => $items,
+            'items' => $items,
         ]);
     }
 
@@ -233,6 +289,36 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Order status updated to ' . $request->status,
+        ]);
+    }
+
+    // Invoice
+    public function invoiceData($id)
+    {
+        $user = Auth::user();
+
+        $order = DB::selectOne("
+         SELECT o.*, 
+                COALESCE(o.recipient_name, u.name) as customer_name, u.email as customer_email
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        WHERE o.id = ? AND o.user_id = ?
+    ", [$id, $user->id]);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        $items = DB::select("
+        SELECT m.name, m.generic_name, oi.quantity, oi.price
+        FROM order_items oi
+        JOIN medicines m ON oi.medicine_id = m.id
+        WHERE oi.order_id = ?
+    ", [$id]);
+
+        return response()->json([
+            'order' => $order,
+            'items' => $items,
         ]);
     }
 }

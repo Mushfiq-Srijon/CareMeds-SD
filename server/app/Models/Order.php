@@ -13,6 +13,7 @@ class Order extends Model
         'delivery_charge',
         'total_price',
         'rider_id',
+        'recipient_name',
         'status',
         'phone',
         'address'

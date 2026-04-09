@@ -13,6 +13,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  pharmacy_id: number;
 }
 
 export default function Checkout() {
@@ -54,9 +55,13 @@ export default function Checkout() {
     setPlacingOrder(true);
 
     try {
-      await apiClient.post("/api/orders", {
-        pharmacy_id: 1,
+      const pharmacyId = cartItems[0]?.pharmacy_id;
+      if (!pharmacyId) return toast.error("Could not determine pharmacy. Please try again.");
+
+      const data = await apiClient.post("/api/orders", {
+        pharmacy_id: pharmacyId,
         delivery_type: deliveryType,
+        recipient_name: customerName,
         phone: phone,
         address: address,
         items: cartItems.map(item => ({
@@ -68,7 +73,7 @@ export default function Checkout() {
       await apiClient.clearCart();
 
       toast.success("Order placed successfully!");
-      navigate("/home");
+      navigate(`/invoice/${data.order_id}`);
     } catch (error: any) {
       toast.error(error?.message || "Failed to place order");
     }
@@ -233,7 +238,7 @@ export default function Checkout() {
                 ) : (
                   <>
                     <svg fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                      <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                     Place Order
                   </>

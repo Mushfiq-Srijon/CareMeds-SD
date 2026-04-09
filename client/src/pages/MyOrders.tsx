@@ -15,6 +15,7 @@ interface Order {
   phone: string;
   address: string;
   created_at: string;
+  consignment_id: string | null;
 }
 
 export default function MyOrders() {
@@ -41,7 +42,11 @@ export default function MyOrders() {
   const pendingOrders = orders.filter((o) => o.status === 'pending');
 
   const previousOrders = orders.filter(
-    (o) => o.status === 'confirmed' || o.status === 'assigned' || o.status === 'delivered' || o.status === 'completed'
+    (o) =>
+      o.status === 'confirmed' ||
+      o.status === 'assigned' ||
+      o.status === 'delivered' ||
+      o.status === 'completed'
   );
 
   const displayed = activeTab === 'pending' ? pendingOrders : previousOrders;
@@ -147,12 +152,25 @@ export default function MyOrders() {
                   <div className="order-total">
                     <span className="label">Total</span>
                     <span className="total-price">
-                      ৳{(Number(order.total_price) + Number(order.delivery_charge)).toFixed(2)}
+                      ৳{Number(order.total_price).toFixed(2)}
                     </span>
                   </div>
                   {order.address && (
                     <div className="order-address">
                       📍 {order.address}
+                    </div>
+                  )}
+                  {order.consignment_id && (
+                    <div className="order-tracking">
+                      <span className="label">🚚 Tracking ID</span>
+                      <a
+                        className="tracking-link"
+                        href={`https://steadfast.com.bd/t/${order.consignment_id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {order.consignment_id}
+                      </a>
                     </div>
                   )}
                 </div>

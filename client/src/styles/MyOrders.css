@@ -303,4 +303,25 @@
   .order-address {
     text-align: left;
   }
+
+  .order-tracking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+}
+
+.tracking-link {
+  color: #5dade2;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+
+.tracking-link:hover {
+  color: #1a5276;
+  text-decoration: underline;
+}
 }

@@ -31,12 +31,12 @@ interface Order {
   delivery_charge: number;
   delivery_type: string;
   status: string;
+  consignment_id: string | null;
   address: string;
   phone: string;
   created_at: string;
 }
-
-const emptyProfile  = { pharmacy_name: '', location: '', phone: '' };
+const emptyProfile = { pharmacy_name: '', location: '', phone: '' };
 const emptyMedicine = {
   name: '', generic_name: '', company: '',
   category: '', stock: '', price: ''
@@ -49,28 +49,28 @@ export default function PharmacyDashboard() {
   const [tab, setTab] = useState<'medicines' | 'orders'>('medicines');
 
   // profile
-  const [pharmacy, setPharmacy]             = useState<Pharmacy | null>(null);
+  const [pharmacy, setPharmacy] = useState<Pharmacy | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm]       = useState(emptyProfile);
-  const [profileSaving, setProfileSaving]   = useState(false);
-  const [phoneTouched, setPhoneTouched]     = useState(false);
+  const [profileForm, setProfileForm] = useState(emptyProfile);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
 
   // medicines
-  const [medicines, setMedicines]       = useState<Medicine[]>([]);
-  const [medLoading, setMedLoading]     = useState(false);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [medLoading, setMedLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm]           = useState(emptyMedicine);
-  const [addSaving, setAddSaving]       = useState(false);
-  const [editMed, setEditMed]           = useState<Medicine | null>(null);
-  const [editForm, setEditForm]         = useState({ stock: '', price: '' });
-  const [editSaving, setEditSaving]     = useState(false);
+  const [addForm, setAddForm] = useState(emptyMedicine);
+  const [addSaving, setAddSaving] = useState(false);
+  const [editMed, setEditMed] = useState<Medicine | null>(null);
+  const [editForm, setEditForm] = useState({ stock: '', price: '' });
+  const [editSaving, setEditSaving] = useState(false);
 
   // orders
-  const [orders, setOrders]                   = useState<Order[]>([]);
-  const [ordersLoading, setOrdersLoading]     = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
-  const [selectedOrder, setSelectedOrder]     = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -111,7 +111,10 @@ export default function PharmacyDashboard() {
     setOrdersLoading(true);
     try {
       const res = await apiClient.get('/api/pharmacy/orders');
+      // handle both {success, orders} and plain array
       if (res.success) setOrders(res.orders);
+      else if (Array.isArray(res)) setOrders(res);
+      else if (res.orders) setOrders(res.orders);
     } catch {
       toast.error('Could not load orders.');
     } finally {
@@ -209,6 +212,32 @@ export default function PharmacyDashboard() {
     }
   }
 
+  async function handleDispatch(orderId: number) {
+    setUpdatingOrderId(orderId);
+    try {
+      const res = await apiClient.post(`/api/pharmacy/orders/${orderId}/dispatch`, {});
+      if (res.success) {
+        toast.success(`Dispatched! Tracking ID: ${res.consignment_id}`);
+        setOrders(prev =>
+          prev.map(o => o.id === orderId
+            ? { ...o, status: 'confirmed', consignment_id: res.consignment_id }
+            : o
+          )
+        );
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder(prev => prev
+            ? { ...prev, status: 'confirmed', consignment_id: res.consignment_id }
+            : prev
+          );
+        }
+      }
+    } catch {
+      toast.error('Failed to dispatch order.');
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  }
+
   async function handleDeleteMedicine(id: number) {
     if (!window.confirm('Delete this medicine?')) return;
     try {
@@ -233,12 +262,12 @@ export default function PharmacyDashboard() {
 
   function getStatusClass(status: string) {
     switch (status) {
-      case 'pending':   return 'pd-badge pending';
+      case 'pending': return 'pd-badge pending';
       case 'confirmed': return 'pd-badge confirmed';
-      case 'assigned':  return 'pd-badge assigned';
+      case 'assigned': return 'pd-badge assigned';
       case 'delivered': return 'pd-badge delivered';
       case 'completed': return 'pd-badge completed';
-      default:          return 'pd-badge';
+      default: return 'pd-badge';
     }
   }
 
@@ -263,19 +292,19 @@ export default function PharmacyDashboard() {
             <span className="pd-order-value" style={{ color: '#1a6fa8', fontWeight: 600 }}>
               {order.medicine_names
                 ? order.medicine_names.split(',').map((name, i) => (
-                    <span key={i} style={{
-                      display: 'inline-block',
-                      background: '#eaf4fb',
-                      color: '#0d3b6e',
-                      borderRadius: 6,
-                      padding: '2px 10px',
-                      margin: '2px 4px 2px 0',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                    }}>
-                      {name.trim()}
-                    </span>
-                  ))
+                  <span key={i} style={{
+                    display: 'inline-block',
+                    background: '#eaf4fb',
+                    color: '#0d3b6e',
+                    borderRadius: 6,
+                    padding: '2px 10px',
+                    margin: '2px 4px 2px 0',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                  }}>
+                    {name.trim()}
+                  </span>
+                ))
                 : '—'}
             </span>
           </div>
@@ -315,25 +344,53 @@ export default function PharmacyDashboard() {
           </div>
           <div className="pd-order-row">
             <span className="pd-order-label">📅 Date</span>
-<span className="pd-order-value">
-  {new Date(new Date(order.created_at).getTime() + 6 * 60 * 60 * 1000).toLocaleString()}
-</span>
+            <span className="pd-order-value">
+              {new Date(new Date(order.created_at).getTime() + 6 * 60 * 60 * 1000).toLocaleString()}
+            </span>
           </div>
         </div>
 
-        <div className="pd-order-actions" style={{ marginTop: 20 }}>
+        <div className="pd-order-actions" style={{ marginTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {order.status === 'pending' && (
+            <button
+              className="pd-btn-confirm"
+              disabled={updatingOrderId === order.id}
+              onClick={() => handleDispatch(order.id)}
+            >
+              {updatingOrderId === order.id ? 'Dispatching...' : '🚚 Confirm & Dispatch via Steadfast'}
+            </button>
+          )}
+
+          {order.status === 'confirmed' && (
             <button
               className="pd-btn-confirm"
               disabled={updatingOrderId === order.id}
               onClick={() => handleUpdateStatus(order.id, 'delivered')}
             >
-              {updatingOrderId === order.id ? 'Updating...' : '✅ Mark as Delivered'}
+              {updatingOrderId === order.id ? 'Updating...' : '📦 Mark as Delivered'}
             </button>
           )}
+
           {order.status === 'delivered' && (
-            <span className="pd-delivered-text">✅ Order Delivered</span>
+            <button
+              className="pd-btn-confirm"
+              disabled={updatingOrderId === order.id}
+              onClick={() => handleUpdateStatus(order.id, 'completed')}
+            >
+              {updatingOrderId === order.id ? 'Updating...' : '✅ Mark as Completed'}
+            </button>
           )}
+
+          {order.consignment_id && (
+            <div style={{
+              background: '#e8f8f5', border: '1.5px solid #27ae60',
+              borderRadius: 10, padding: '10px 16px', fontSize: 13
+            }}>
+              <span style={{ color: '#1a7f64', fontWeight: 600 }}>📦 Tracking ID: </span>
+              <span style={{ color: '#0a2342', fontWeight: 700 }}>{order.consignment_id}</span>
+            </div>
+          )}
+
           {order.status === 'completed' && (
             <span className="pd-delivered-text">✅ Order Completed</span>
           )}
