@@ -351,13 +351,23 @@ export default function PharmacyDashboard() {
         </div>
 
         <div className="pd-order-actions" style={{ marginTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {order.status === 'pending' && (
+          {order.status === 'pending' && order.delivery_type === 'home_delivery' && (
             <button
               className="pd-btn-confirm"
               disabled={updatingOrderId === order.id}
               onClick={() => handleDispatch(order.id)}
             >
               {updatingOrderId === order.id ? 'Dispatching...' : '🚚 Confirm & Dispatch via Steadfast'}
+            </button>
+          )}
+
+          {order.status === 'pending' && order.delivery_type === 'pickup' && (
+            <button
+              className="pd-btn-confirm"
+              disabled={updatingOrderId === order.id}
+              onClick={() => handleUpdateStatus(order.id, 'confirmed')}
+            >
+              {updatingOrderId === order.id ? 'Updating...' : '✅ Confirm Order'}
             </button>
           )}
 

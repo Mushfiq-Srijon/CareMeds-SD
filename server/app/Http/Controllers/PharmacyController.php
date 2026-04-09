@@ -36,8 +36,8 @@ class PharmacyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'pharmacy_name' => 'required|string|max:255',
-            'location'      => 'required|string|max:255',
-            'phone'         => ['required', 'regex:/^01[0-9]{9}$/'],
+            'location' => 'required|string|max:255',
+            'phone' => ['required', 'regex:/^01[0-9]{9}$/'],
         ]);
 
         if ($validator->fails()) {
@@ -135,14 +135,29 @@ class PharmacyController extends Controller
             return response()->json(['success' => false, 'message' => 'No pharmacy profile found.'], 404);
         }
 
-        $orders = DB::select(
-            'SELECT o.*, u.name as customer_name, u.email as customer_email
-             FROM orders o
-             JOIN users u ON o.user_id = u.id
-             WHERE o.pharmacy_id = ?
-             ORDER BY o.created_at DESC',
-            [$pharmacy->id]
-        );
+        $orders = DB::select("
+        SELECT
+            o.id, o.status, o.delivery_type, o.total_price,
+            o.delivery_charge, o.address, o.phone, o.created_at,
+            o.consignment_id,
+            u.name  as customer_name,
+            u.email as customer_email,
+            GROUP_CONCAT(
+                CONCAT(m.name, ' x', oi.quantity)
+                ORDER BY m.name
+                SEPARATOR ', '
+            ) as medicine_names
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN medicines m ON oi.medicine_id = m.id
+        WHERE o.pharmacy_id = ?
+        GROUP BY
+            o.id, o.status, o.delivery_type, o.total_price,
+            o.delivery_charge, o.address, o.phone, o.created_at,
+            o.consignment_id, u.name, u.email
+        ORDER BY o.created_at DESC
+    ", [$pharmacy->id]);
 
         return response()->json([
             'success' => true,
