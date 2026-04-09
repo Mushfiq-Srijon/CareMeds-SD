@@ -50,6 +50,7 @@ class OrderController extends Controller
                 'delivery_charge' => $deliveryCharge,
                 'total_price' => $totalPrice,
                 'rider_id' => $riderId,
+                'recipient_name' => $request->recipient_name,
                 'phone' => $request->phone,
                 'address' => $request->address,
             ]);
@@ -79,7 +80,7 @@ class OrderController extends Controller
             // Build order object for invoice
             $orderForInvoice = (object) [
                 'id' => $order->id,
-                'customer_name' => $customer->name,
+                'customer_name' => $request->recipient_name ?? $customer->name,
                 'phone' => $order->phone,
                 'address' => $order->address,
                 'delivery_type' => $order->delivery_type,
@@ -297,7 +298,8 @@ class OrderController extends Controller
         $user = Auth::user();
 
         $order = DB::selectOne("
-        SELECT o.*, u.name as customer_name, u.email as customer_email
+         SELECT o.*, 
+                COALESCE(o.recipient_name, u.name) as customer_name, u.email as customer_email
         FROM orders o
         JOIN users u ON o.user_id = u.id
         WHERE o.id = ? AND o.user_id = ?

@@ -61,6 +61,7 @@ export default function Checkout() {
       const data = await apiClient.post("/api/orders", {
         pharmacy_id: pharmacyId,
         delivery_type: deliveryType,
+        recipient_name: customerName,
         phone: phone,
         address: address,
         items: cartItems.map(item => ({
