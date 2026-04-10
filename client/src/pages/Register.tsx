@@ -3,16 +3,15 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName]                     = useState("");
+  const [email, setEmail]                   = useState("");
+  const [password, setPassword]             = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole]                     = useState("");
+  const [showPassword, setShowPassword]     = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Handles normal email/password registration
   const handleRegister = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!role) { alert("Please select a role"); return; }
@@ -37,7 +36,6 @@ function Register() {
     }
   };
 
-   // Handles Google OAuth login
   const handleGoogleLogin = async () => {
     try {
       const res = await fetch("http://localhost:8000/api/auth/google");
@@ -51,7 +49,9 @@ function Register() {
       alert("Server error. Please try again.");
     }
   };
+
   return (
+    // FIX: minHeight instead of height so box doesn't get cut on small screens
     <div style={styles.container}>
       <div style={styles.card}>
         <h2 style={styles.title}>Register</h2>
@@ -60,61 +60,46 @@ function Register() {
           {/* Name */}
           <div style={styles.inputGroup}>
             <input
-              type="text"
-              required
-              value={name}
+              type="text" required value={name}
               onChange={(e) => setName(e.target.value)}
-              style={styles.input}
-              placeholder=" "
+              style={styles.input} placeholder=" "
             />
             <label style={{
               ...styles.label,
               top: name ? "-10px" : "50%",
               fontSize: name ? "12px" : "16px",
               color: name ? "#4da6ff" : "#e0e0e0",
-            }}>
-              Name
-            </label>
+            }}>Name</label>
           </div>
 
           {/* Email */}
           <div style={styles.inputGroup}>
             <input
-              type="email"
-              required
-              value={email}
+              type="email" required value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              placeholder=" "
+              style={styles.input} placeholder=" "
             />
             <label style={{
               ...styles.label,
               top: email ? "-10px" : "50%",
               fontSize: email ? "12px" : "16px",
               color: email ? "#4da6ff" : "#e0e0e0",
-            }}>
-              Email
-            </label>
+            }}>Email</label>
           </div>
 
           {/* Password */}
           <div style={styles.inputGroup}>
             <input
-              type={showPassword ? "text" : "password"}
-              required
-              value={password}
+              type={showPassword ? "text" : "password"} required value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ ...styles.input, paddingRight: "45px" }}
-              placeholder=" "
+              style={{ ...styles.input, paddingRight: "45px" }} placeholder=" "
             />
             <label style={{
               ...styles.label,
               top: password ? "-10px" : "50%",
               fontSize: password ? "12px" : "16px",
               color: password ? "#4da6ff" : "#e0e0e0",
-            }}>
-              Password
-            </label>
+            }}>Password</label>
             <span onClick={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
               {showPassword ? "🙈" : "👁️"}
             </span>
@@ -123,27 +108,22 @@ function Register() {
           {/* Confirm Password */}
           <div style={styles.inputGroup}>
             <input
-              type={showConfirmPassword ? "text" : "password"}
-              required
-              value={confirmPassword}
+              type={showConfirmPassword ? "text" : "password"} required value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              style={{ ...styles.input, paddingRight: "45px" }}
-              placeholder=" "
+              style={{ ...styles.input, paddingRight: "45px" }} placeholder=" "
             />
             <label style={{
               ...styles.label,
               top: confirmPassword ? "-10px" : "50%",
               fontSize: confirmPassword ? "12px" : "16px",
               color: confirmPassword ? "#4da6ff" : "#e0e0e0",
-            }}>
-              Confirm Password
-            </label>
+            }}>Confirm Password</label>
             <span onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
               {showConfirmPassword ? "🙈" : "👁️"}
             </span>
           </div>
 
-          {/* Role Selection */}
+          {/* Role Selection — admin added */}
           <div style={{ marginBottom: "30px" }}>
             <select
               value={role}
@@ -154,23 +134,19 @@ function Register() {
               <option value="customer">Customer</option>
               <option value="pharmacy">Pharmacy</option>
               <option value="rider">Rider</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
 
-          {/* Register Button */}
-          <button type="submit" style={styles.button}>
-            Register
-          </button>
+          <button type="submit" style={styles.button}>Register</button>
         </form>
 
-        {/* Divider between email register and Google register */}
         <div style={styles.divider}>
           <span style={styles.dividerLine} />
           <span style={styles.dividerText}>or</span>
           <span style={styles.dividerLine} />
         </div>
 
-        {/* Google Register Button */}
         <button onClick={handleGoogleLogin} style={styles.googleButton}>
           <img
             src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -194,7 +170,9 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "100vh",
+    // FIX: was height:"100vh" which cuts the box — now minHeight + padding
+    minHeight: "100vh",
+    padding: "40px 16px",
     fontFamily: "'Poppins', sans-serif",
   },
   card: {
@@ -204,7 +182,9 @@ const styles = {
     padding: "50px 40px",
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.25)",
     textAlign: "center",
-    width: "380px",
+    // FIX: was width:"380px" which overflows on mobile — now width+maxWidth
+    width: "100%",
+    maxWidth: "420px",
     color: "#fff",
   },
   title: {
@@ -227,6 +207,7 @@ const styles = {
     color: "#fff",
     fontSize: "16px",
     transition: "0.3s",
+    boxSizing: "border-box",
   },
   label: {
     position: "absolute",
@@ -243,6 +224,7 @@ const styles = {
     outline: "none",
     fontSize: "16px",
     color: "#333",
+    boxSizing: "border-box",
   },
   button: {
     width: "100%",

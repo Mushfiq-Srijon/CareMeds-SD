@@ -1,18 +1,17 @@
 /* ── MyOrders.css ── */
 
-/* Page wrapper */
 .myorders-page {
   min-height: 100vh;
   background: #f0f4f8;
   font-family: 'DM Sans', sans-serif;
 }
 
-/* ── Hero Header ── */
+/* ── Hero ── */
 .myorders-hero {
   position: relative;
   background: linear-gradient(135deg, #0a2342 0%, #0d3b6e 60%, #1a5276 100%);
   border-radius: 0 0 28px 28px;
-  box-shadow: 0 8px 40px rgba(10, 35, 66, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 40px rgba(10,35,66,0.35), 0 2px 8px rgba(0,0,0,0.2);
   padding: 56px 24px 48px;
   text-align: center;
   overflow: hidden;
@@ -21,27 +20,23 @@
 .myorders-hero-overlay {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
   background-size: 28px 28px;
   pointer-events: none;
 }
 
-.myorders-hero-content {
-  position: relative;
-  z-index: 1;
-}
+.myorders-hero-content { position: relative; z-index: 1; }
 
 .myorders-hero-content h1 {
   font-family: 'Raleway', sans-serif;
   font-size: 2.4rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #fff;
   margin: 0 0 10px;
-  letter-spacing: -0.5px;
 }
 
 .myorders-hero-content p {
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255,255,255,0.75);
   font-size: 1.05rem;
   margin: 0;
 }
@@ -68,30 +63,30 @@
   padding: 12px 24px;
   border: 2px solid transparent;
   border-radius: 10px;
-  background: #ffffff;
+  background: #fff;
   color: #0a2342;
   font-family: 'DM Sans', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 12px 28px rgba(10,35,66,0.10), 0 0 0 1px rgba(93,173,226,0.06);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 12px 28px rgba(10,35,66,0.10);
   transition: all 0.2s ease;
 }
 
 .tab-btn:hover {
   border-color: #5dade2;
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.2), 0 8px 24px rgba(52, 152, 219, 0.4);
+  box-shadow: 0 0 0 3px rgba(93,173,226,0.2), 0 8px 24px rgba(52,152,219,0.4);
 }
 
 .tab-btn.tab-active {
   background: linear-gradient(135deg, #0d3b6e, #1a6fa8);
-  color: #ffffff;
+  color: #fff;
   border-color: transparent;
 }
 
 .tab-count {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255,255,255,0.25);
   color: inherit;
   border-radius: 20px;
   padding: 2px 8px;
@@ -114,35 +109,23 @@
 .spinner {
   width: 44px;
   height: 44px;
-  border: 4px solid rgba(13, 59, 110, 0.15);
+  border: 4px solid rgba(13,59,110,0.15);
   border-top-color: #0d3b6e;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 16px;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* ── Empty ── */
 .myorders-empty {
   text-align: center;
   padding: 70px 20px;
-  color: #667;
 }
 
-.empty-icon {
-  font-size: 3.5rem;
-  display: block;
-  margin-bottom: 16px;
-}
-
-.myorders-empty p {
-  font-size: 1.05rem;
-  color: #5a6a7a;
-  margin: 0;
-}
+.empty-icon { font-size: 3.5rem; display: block; margin-bottom: 16px; }
+.myorders-empty p { font-size: 1.05rem; color: #5a6a7a; margin: 0; }
 
 /* ── Orders Grid ── */
 .orders-grid {
@@ -153,22 +136,20 @@
 
 /* ── Order Card ── */
 .order-card {
-  background: #ffffff;
+  background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.04),
               0 12px 28px rgba(10,35,66,0.10),
               0 0 0 1px rgba(93,173,226,0.06);
   padding: 22px 24px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .order-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.15),
-              0 16px 36px rgba(10, 35, 66, 0.14);
+  box-shadow: 0 0 0 3px rgba(93,173,226,0.15), 0 16px 36px rgba(10,35,66,0.14);
 }
 
-/* Card Header: order id + badge */
 .order-card-header {
   display: flex;
   justify-content: space-between;
@@ -183,46 +164,79 @@
   color: #0a2342;
 }
 
-/* ── Status Badges ── */
+/* ── Status Badges — fixed colors ── */
 .badge {
   display: inline-block;
-  padding: 4px 14px;
+  padding: 5px 14px;
   border-radius: 20px;
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
 }
 
+/* pending = yellow */
 .badge-pending {
-  background: #fff8e1;
-  color: #b7820a;
-  border: 1.5px solid #f6c90e44;
+  background: #020875;
+  color: #92650a;
+  border: 1.5px solid #150400;
 }
 
+/* confirmed = blue */
+.badge-confirmed {
+  background: #0077ff;
+  color: #0d47a1;
+  border: 1.5px solid #90caf9;
+}
+
+/* assigned = purple */
 .badge-assigned {
-  background: #e3f0ff;
-  color: #1a5276;
-  border: 1.5px solid #5dade244;
+  background: #dd00ff;
+  color: #6a1b9a;
+  border: 1.5px solid #ce93d8;
 }
 
-.badge-delivered,
+/* delivered = green */
+.badge-delivered {
+  background: #087a12;
+  color: #1b5e20;
+  border: 1.5px solid #b1d2a6;
+}
+
+/* completed = teal */
 .badge-completed {
-  background: #eafaf1;
-  color: #1a7a44;
-  border: 1.5px solid #27ae6044;
+  background: #e0f7fa;
+  color: #006064;
+  border: 1.5px solid #80deea;
 }
 
-/* Medicines row */
+/* ── Medicine pills ── */
 .order-medicines {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   margin-bottom: 14px;
   padding-bottom: 14px;
   border-bottom: 1px solid #f0f4f8;
 }
 
-/* Meta row */
+.medicine-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.medicine-pill {
+  background: #eaf4fb;
+  color: #0d3b6e;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid #b8d9ef;
+}
+
+/* ── Meta row ── */
 .order-meta-row {
   display: flex;
   gap: 24px;
@@ -236,7 +250,6 @@
   gap: 3px;
 }
 
-/* Labels & values */
 .label {
   font-size: 0.75rem;
   font-weight: 700;
@@ -251,11 +264,9 @@
   font-weight: 500;
 }
 
-.capitalize {
-  text-transform: capitalize;
-}
+.capitalize { text-transform: capitalize; }
 
-/* Footer */
+/* ── Footer ── */
 .order-footer {
   display: flex;
   justify-content: space-between;
@@ -266,11 +277,7 @@
   border-top: 1px solid #f0f4f8;
 }
 
-.order-total {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.order-total { display: flex; flex-direction: column; gap: 2px; }
 
 .total-price {
   font-family: 'Raleway', sans-serif;
@@ -286,25 +293,7 @@
   text-align: right;
 }
 
-/* ── Responsive ── */
-@media (max-width: 600px) {
-  .myorders-hero-content h1 {
-    font-size: 1.8rem;
-  }
-
-  .order-card {
-    padding: 16px 16px;
-  }
-
-  .order-meta-row {
-    gap: 14px;
-  }
-
-  .order-address {
-    text-align: left;
-  }
-
-  .order-tracking {
+.order-tracking {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -316,12 +305,19 @@
   color: #5dade2;
   font-weight: 600;
   text-decoration: none;
-  letter-spacing: 0.5px;
-  transition: color 0.2s;
 }
 
 .tracking-link:hover {
   color: #1a5276;
   text-decoration: underline;
 }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .myorders-hero-content h1 { font-size: 1.8rem; }
+  .order-card { padding: 16px; }
+  .order-meta-row { gap: 14px; }
+  .order-address { text-align: left; }
+  .myorders-tabs { gap: 8px; }
+  .tab-btn { padding: 10px 16px; font-size: 0.85rem; }
 }
