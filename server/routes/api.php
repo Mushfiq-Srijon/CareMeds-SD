@@ -11,6 +11,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PharmacyController;
 use App\Http\Controllers\SteadfastController;
+use App\Http\Controllers\PaymentController;
 
 // ── Public Routes ─────────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
@@ -26,6 +27,10 @@ Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']
 
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->name('verification.verify');
+
+
+Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
+
 
 // ── Protected Routes ──────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -59,4 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{id}/invoice', [OrderController::class, 'invoiceData']);
     //Steadfast
     Route::post('/pharmacy/orders/{id}/dispatch', [SteadfastController::class, 'sendToSteadfast']);
+
+    //Stripe
+    Route::post('/payment/create-intent', [PaymentController::class, 'createIntent']);
 });
