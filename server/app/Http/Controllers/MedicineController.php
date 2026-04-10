@@ -9,15 +9,36 @@ use Illuminate\Support\Facades\Validator;
 class MedicineController extends Controller
 {
     // GET /api/medicines
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->query('search', '');
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = (int) $request->query('per_page', 12);
+        $offset = ($page - 1) * $perPage;
+        $like = '%' . $search . '%';
+
         $medicines = DB::select(
-            'SELECT * FROM medicines 
-             ORDER BY 
-                CASE WHEN pharmacy_id IS NOT NULL THEN 0 ELSE 1 END,
-                id ASC'
+            'SELECT * FROM medicines
+         WHERE pharmacy_id IS NOT NULL
+           AND (name LIKE ? OR generic_name LIKE ?)
+         ORDER BY id ASC
+         LIMIT ? OFFSET ?',
+            [$like, $like, $perPage, $offset]
         );
-        return response()->json($medicines);
+
+        $totalRow = DB::selectOne(
+            'SELECT COUNT(*) as total FROM medicines
+         WHERE pharmacy_id IS NOT NULL
+           AND (name LIKE ? OR generic_name LIKE ?)',
+            [$like, $like]
+        );
+
+        return response()->json([
+            'data' => $medicines,
+            'total' => $totalRow->total,
+            'page' => $page,
+            'per_page' => $perPage,
+        ]);
     }
 
     //  5: GET /api/medicines/{id}
@@ -45,18 +66,18 @@ class MedicineController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name'         => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'generic_name' => 'required|string|max:255',
-            'company'      => 'required|string|max:255',
-            'category'     => 'required|string|max:255',
-            'stock'        => 'required|integer|min:0',
-            'price'        => 'required|numeric|min:0',
+            'company' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'stock' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors()
             ], 422);
         }
 
@@ -106,7 +127,7 @@ class MedicineController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors'  => $validator->errors()
+                'errors' => $validator->errors()
             ], 422);
         }
 

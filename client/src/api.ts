@@ -65,8 +65,8 @@ class ApiClient {
   }
 
   // ─── Medicines ───────────────────────────────────────────────
-  async getMedicines() {
-    return this.get('/api/medicines');
+  async getMedicines(search = '', page = 1, perPage = 12) {
+    return this.get(`/api/medicines?search=${encodeURIComponent(search)}&page=${page}&per_page=${perPage}`);
   }
 
   // Get single medicine with pharmacy info (Oni)

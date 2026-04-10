@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ApiClient from '../api';
 import { Spinner } from 'react-bootstrap';
@@ -19,12 +19,43 @@ interface Medicine {
 
 export default function Home() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [search, setSearch]       = useState('');
+  const [loading, setLoading]     = useState(false);
+  const [page, setPage]           = useState(1);
+  const [total, setTotal]         = useState(0);
+  const perPage                   = 12;
+  const navigate                  = useNavigate();
+
+  const fetchMedicines = useCallback(async (searchVal: string, pageVal: number) => {
+    setLoading(true);
+    try {
+      const res = await apiClient.getMedicines(searchVal, pageVal, perPage);
+      setMedicines(res.data ?? []);
+      setTotal(res.total ?? 0);
+    } catch {
+      toast.error('Failed to fetch medicines');
+    }
+    setLoading(false);
+  }, []);
+
+  // Debounce search — waits 400ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+      fetchMedicines(search, 1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch on page change
+  useEffect(() => {
+    fetchMedicines(search, page);
+  }, [page]);
+
+  const totalPages = Math.ceil(total / perPage);
 
   const handleAddToCart = async (e: React.MouseEvent, medicineId: number) => {
-    e.stopPropagation(); // prevent card click
+    e.stopPropagation();
     try {
       await apiClient.addToCart(medicineId, 1);
       toast.success('Added to cart!');
@@ -32,23 +63,6 @@ export default function Home() {
       toast.error('Failed to add to cart');
     }
   };
-
-  useEffect(() => {
-    const fetchMedicines = async () => {
-      setLoading(true);
-      const res = await apiClient.getMedicines();
-      if (Array.isArray(res)) setMedicines(res);
-      else console.error('Unexpected API response:', res);
-      setLoading(false);
-    };
-    fetchMedicines();
-  }, []);
-
-  const filtered = medicines.filter(
-    (m) =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.generic_name.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="home-root">
@@ -87,7 +101,7 @@ export default function Home() {
           </div>
         )}
 
-        {!loading && filtered.length === 0 && (
+        {!loading && medicines.length === 0 && (
           <div className="home-empty">
             <span className="empty-icon">💊</span>
             <p>No medicines found</p>
@@ -95,7 +109,7 @@ export default function Home() {
         )}
 
         <div className="med-grid">
-          {filtered.map((m, i) => (
+          {medicines.map((m, i) => (
             <div
               className="med-card"
               key={m.id}
@@ -113,7 +127,6 @@ export default function Home() {
               <div className="med-card-body">
                 <h3 className="med-name">{m.name}</h3>
                 <p className="med-generic">{m.generic_name}</p>
-
                 <div className="med-meta">
                   <div className="med-meta-row">
                     <span className="meta-label">Company</span>
@@ -146,6 +159,31 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className="pagination-row">
+            <button
+              className="page-btn"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+            >
+              ← Prev
+            </button>
+            <span className="page-info">
+              Page {page} of {totalPages}
+              <span className="page-total"> ({total} results)</span>
+            </span>
+            <button
+              className="page-btn"
+              disabled={page === totalPages}
+              onClick={() => setPage(p => p + 1)}
+            >
+              Next →
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );
