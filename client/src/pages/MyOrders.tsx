@@ -18,14 +18,14 @@ interface Order {
   consignment_id: string | null;
 }
 
-export default function MyOrders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'pending' | 'previous'>('pending');
+type TabType = 'pending' | 'ongoing' | 'completed';
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+export default function MyOrders() {
+  const [orders, setOrders]       = useState<Order[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [activeTab, setActiveTab] = useState<TabType>('pending');
+
+  useEffect(() => { fetchOrders(); }, []);
 
   async function fetchOrders() {
     try {
@@ -39,23 +39,18 @@ export default function MyOrders() {
     }
   }
 
-  const pendingOrders = orders.filter((o) => o.status === 'pending');
+  const pendingOrders   = orders.filter(o => o.status === 'pending');
+  const ongoingOrders   = orders.filter(o => o.status === 'confirmed' || o.status === 'assigned');
+  const completedOrders = orders.filter(o => o.status === 'delivered' || o.status === 'completed');
 
-  const previousOrders = orders.filter(
-    (o) =>
-      o.status === 'confirmed' ||
-      o.status === 'assigned' ||
-      o.status === 'delivered' ||
-      o.status === 'completed'
-  );
-
-  const displayed = activeTab === 'pending' ? pendingOrders : previousOrders;
+  const displayed =
+    activeTab === 'pending'   ? pendingOrders   :
+    activeTab === 'ongoing'   ? ongoingOrders   :
+    completedOrders;
 
   function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: 'numeric', month: 'short', day: 'numeric',
     });
   }
 
@@ -69,6 +64,23 @@ export default function MyOrders() {
       default:          return 'badge';
     }
   }
+
+  function getStatusLabel(status: string) {
+    switch (status) {
+      case 'pending':   return '🕐 Pending';
+      case 'confirmed': return '✅ Confirmed';
+      case 'assigned':  return '🚴 On the Way';
+      case 'delivered': return '📦 Delivered';
+      case 'completed': return '✅ Completed';
+      default:          return status;
+    }
+  }
+
+  const emptyMessages = {
+    pending:   { icon: '📭', text: 'No pending orders right now.' },
+    ongoing:   { icon: '🚴', text: 'No ongoing orders right now.' },
+    completed: { icon: '🗂️', text: 'No completed orders yet.' },
+  };
 
   return (
     <div className="myorders-page">
@@ -88,18 +100,27 @@ export default function MyOrders() {
             className={`tab-btn ${activeTab === 'pending' ? 'tab-active' : ''}`}
             onClick={() => setActiveTab('pending')}
           >
-            🕐 Pending Orders
+            🕐 Pending
             {pendingOrders.length > 0 && (
               <span className="tab-count">{pendingOrders.length}</span>
             )}
           </button>
           <button
-            className={`tab-btn ${activeTab === 'previous' ? 'tab-active' : ''}`}
-            onClick={() => setActiveTab('previous')}
+            className={`tab-btn ${activeTab === 'ongoing' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('ongoing')}
           >
-            ✅ Previous Orders
-            {previousOrders.length > 0 && (
-              <span className="tab-count">{previousOrders.length}</span>
+            🚴 Ongoing
+            {ongoingOrders.length > 0 && (
+              <span className="tab-count">{ongoingOrders.length}</span>
+            )}
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'completed' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('completed')}
+          >
+            ✅ Completed
+            {completedOrders.length > 0 && (
+              <span className="tab-count">{completedOrders.length}</span>
             )}
           </button>
         </div>
@@ -111,14 +132,8 @@ export default function MyOrders() {
           </div>
         ) : displayed.length === 0 ? (
           <div className="myorders-empty">
-            <span className="empty-icon">
-              {activeTab === 'pending' ? '📭' : '🗂️'}
-            </span>
-            <p>
-              {activeTab === 'pending'
-                ? 'No pending orders right now.'
-                : 'No previous orders yet.'}
-            </p>
+            <span className="empty-icon">{emptyMessages[activeTab].icon}</span>
+            <p>{emptyMessages[activeTab].text}</p>
           </div>
         ) : (
           <div className="orders-grid">
@@ -128,19 +143,30 @@ export default function MyOrders() {
                 <div className="order-card-header">
                   <span className="order-id">Order #{order.id}</span>
                   <span className={getStatusClass(order.status)}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    {getStatusLabel(order.status)}
                   </span>
                 </div>
 
                 <div className="order-medicines">
                   <span className="label">💊 Medicines</span>
-                  <span className="value">{order.medicine_names}</span>
+                  <div className="medicine-pills">
+                    {order.medicine_names
+                      ? order.medicine_names.split(',').map((name, i) => (
+                          <span key={i} className="medicine-pill">
+                            {name.trim()}
+                          </span>
+                        ))
+                      : <span className="value">—</span>
+                    }
+                  </div>
                 </div>
 
                 <div className="order-meta-row">
                   <div className="order-meta-item">
                     <span className="label">🚚 Delivery</span>
-                    <span className="value capitalize">{order.delivery_type}</span>
+                    <span className="value capitalize">
+                      {order.delivery_type === 'home_delivery' ? 'Home Delivery' : 'Pickup'}
+                    </span>
                   </div>
                   <div className="order-meta-item">
                     <span className="label">📅 Date</span>
@@ -156,21 +182,19 @@ export default function MyOrders() {
                     </span>
                   </div>
                   {order.address && (
-                    <div className="order-address">
-                      📍 {order.address}
-                    </div>
+                    <div className="order-address">📍 {order.address}</div>
                   )}
                   {order.consignment_id && (
                     <div className="order-tracking">
                       <span className="label">🚚 Tracking ID</span>
-                      <a
+                      
                         className="tracking-link"
                         href={`https://steadfast.com.bd/t/${order.consignment_id}`}
                         target="_blank"
                         rel="noreferrer"
-                      >
+                      
                         {order.consignment_id}
-                      </a>
+                    
                     </div>
                   )}
                 </div>

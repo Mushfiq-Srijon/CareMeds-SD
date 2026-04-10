@@ -39,7 +39,7 @@ interface Order {
   created_at: string;
 }
 
-const emptyProfile = { pharmacy_name: '', location: '', phone: '' };
+const emptyProfile  = { pharmacy_name: '', location: '', phone: '' };
 const emptyMedicine = {
   name: '', generic_name: '', company: '',
   category: '', stock: '', price: ''
@@ -51,29 +51,26 @@ export default function PharmacyDashboard() {
 
   const [tab, setTab] = useState<'medicines' | 'orders'>('medicines');
 
-  // profile
-  const [pharmacy, setPharmacy] = useState<Pharmacy | null>(null);
+  const [pharmacy, setPharmacy]             = useState<Pharmacy | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState(emptyProfile);
-  const [profileSaving, setProfileSaving] = useState(false);
-  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [profileForm, setProfileForm]       = useState(emptyProfile);
+  const [profileSaving, setProfileSaving]   = useState(false);
+  const [phoneTouched, setPhoneTouched]     = useState(false);
 
-  // medicines
-  const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [medLoading, setMedLoading] = useState(false);
+  const [medicines, setMedicines]       = useState<Medicine[]>([]);
+  const [medLoading, setMedLoading]     = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm] = useState(emptyMedicine);
-  const [addSaving, setAddSaving] = useState(false);
-  const [editMed, setEditMed] = useState<Medicine | null>(null);
-  const [editForm, setEditForm] = useState({ stock: '', price: '' });
-  const [editSaving, setEditSaving] = useState(false);
+  const [addForm, setAddForm]           = useState(emptyMedicine);
+  const [addSaving, setAddSaving]       = useState(false);
+  const [editMed, setEditMed]           = useState<Medicine | null>(null);
+  const [editForm, setEditForm]         = useState({ stock: '', price: '' });
+  const [editSaving, setEditSaving]     = useState(false);
 
-  // orders
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [orders, setOrders]                   = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading]     = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder]     = useState<Order | null>(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -328,29 +325,27 @@ export default function PharmacyDashboard() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-
           <div className="pd-order-row">
             <span className="pd-order-label">💊 Medicines</span>
             <span className="pd-order-value" style={{ color: '#1a6fa8', fontWeight: 600 }}>
               {order.medicine_names
                 ? order.medicine_names.split(',').map((name, i) => (
-                  <span key={i} style={{
-                    display: 'inline-block',
-                    background: '#eaf4fb',
-                    color: '#0d3b6e',
-                    borderRadius: 6,
-                    padding: '2px 10px',
-                    margin: '2px 4px 2px 0',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                  }}>
-                    {name.trim()}
-                  </span>
-                ))
+                    <span key={i} style={{
+                      display: 'inline-block',
+                      background: '#eaf4fb',
+                      color: '#0d3b6e',
+                      borderRadius: 6,
+                      padding: '2px 10px',
+                      margin: '2px 4px 2px 0',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                    }}>
+                      {name.trim()}
+                    </span>
+                  ))
                 : '—'}
             </span>
           </div>
-
           <div className="pd-order-row">
             <span className="pd-order-label">👤 Customer</span>
             <span className="pd-order-value">{order.customer_name}</span>
@@ -408,7 +403,6 @@ export default function PharmacyDashboard() {
               {updatingOrderId === order.id ? 'Dispatching...' : '🚚 Confirm & Dispatch via Steadfast'}
             </button>
           )}
-
           {order.status === 'pending' && order.delivery_type === 'pickup' && (
             <button
               className="pd-btn-confirm"
@@ -418,7 +412,6 @@ export default function PharmacyDashboard() {
               {updatingOrderId === order.id ? 'Updating...' : '✅ Confirm Order'}
             </button>
           )}
-
           {order.status === 'confirmed' && (
             <button
               className="pd-btn-confirm"
@@ -428,7 +421,6 @@ export default function PharmacyDashboard() {
               {updatingOrderId === order.id ? 'Updating...' : '📦 Mark as Delivered'}
             </button>
           )}
-
           {order.status === 'delivered' && (
             <button
               className="pd-btn-confirm"
@@ -438,7 +430,6 @@ export default function PharmacyDashboard() {
               {updatingOrderId === order.id ? 'Updating...' : '✅ Mark as Completed'}
             </button>
           )}
-
           {order.consignment_id && (
             <div style={{
               background: '#e8f8f5', border: '1.5px solid #27ae60',
@@ -448,7 +439,6 @@ export default function PharmacyDashboard() {
               <span style={{ color: '#0a2342', fontWeight: 700 }}>{order.consignment_id}</span>
             </div>
           )}
-
           {order.status === 'completed' && (
             <span className="pd-delivered-text">✅ Order Completed</span>
           )}
@@ -458,10 +448,10 @@ export default function PharmacyDashboard() {
   }
 
   // ── Order List View ──
-  function OrderList() {
+  function OrderList({ orders: orderList }: { orders: Order[] }) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {orders.map((order, index) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
+        {orderList.map((order, index) => (
           <div
             key={order.id}
             onClick={() => setSelectedOrder(order)}
@@ -486,7 +476,6 @@ export default function PharmacyDashboard() {
               (e.currentTarget as HTMLDivElement).style.borderColor = '#d0dce8';
             }}
           >
-            {/* Left: serial + info */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               <span style={{
                 width: 32, height: 32, flexShrink: 0,
@@ -509,8 +498,6 @@ export default function PharmacyDashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Right: total + status + payment + arrow */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
               <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0a2342' }}>
                 ৳{Number(order.total_price).toFixed(2)}
@@ -518,8 +505,7 @@ export default function PharmacyDashboard() {
               <span className={getStatusClass(order.status)}>
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </span>
-              {getPaymentBadge(order.payment_type, order.payment_status)}
-              <span style={{ color: '#7f8c9a', fontSize: '1.2rem', lineHeight: 1 }}>›</span>
+              <span style={{ color: '#7f8c9a', fontSize: '1.2rem' }}>›</span>
             </div>
           </div>
         ))}
@@ -529,7 +515,6 @@ export default function PharmacyDashboard() {
 
   return (
     <>
-      {/* Hero */}
       <div className="pd-hero">
         <h1>Pharmacy Dashboard</h1>
         <p>Manage your profile, medicines and incoming orders</p>
@@ -544,7 +529,6 @@ export default function PharmacyDashboard() {
               Loading profile...
             </p>
           </div>
-
         ) : !pharmacy || editingProfile ? (
           <div className="pd-card">
             <h2>{pharmacy ? 'Edit Profile' : '📋 Set Up Your Pharmacy Profile'}</h2>
@@ -601,7 +585,6 @@ export default function PharmacyDashboard() {
               </div>
             </form>
           </div>
-
         ) : (
           <div className="pd-card">
             <div className="pd-section-header">
@@ -724,10 +707,7 @@ export default function PharmacyDashboard() {
                       : 'Incoming Orders'}
                   </h2>
                   {selectedOrder && (
-                    <button
-                      className="pd-btn-cancel"
-                      onClick={() => setSelectedOrder(null)}
-                    >
+                    <button className="pd-btn-cancel" onClick={() => setSelectedOrder(null)}>
                       ← All Orders
                     </button>
                   )}
@@ -745,13 +725,48 @@ export default function PharmacyDashboard() {
                 ) : selectedOrder ? (
                   <OrderDetail order={selectedOrder} />
                 ) : (
-                  <OrderList />
+                  <>
+                    {orders.filter(o => o.status === 'pending').length > 0 && (
+                      <div className="pd-orders-section">
+                        <div className="pd-orders-section-title pending-title">
+                          🕐 Pending
+                          <span className="pd-orders-section-count">
+                            {orders.filter(o => o.status === 'pending').length}
+                          </span>
+                        </div>
+                        <OrderList orders={orders.filter(o => o.status === 'pending')} />
+                      </div>
+                    )}
+                    {orders.filter(o => o.status === 'confirmed' || o.status === 'assigned').length > 0 && (
+                      <div className="pd-orders-section">
+                        <div className="pd-orders-section-title ongoing-title">
+                          🚴 Ongoing
+                          <span className="pd-orders-section-count">
+                            {orders.filter(o => o.status === 'confirmed' || o.status === 'assigned').length}
+                          </span>
+                        </div>
+                        <OrderList orders={orders.filter(o => o.status === 'confirmed' || o.status === 'assigned')} />
+                      </div>
+                    )}
+                    {orders.filter(o => o.status === 'delivered' || o.status === 'completed').length > 0 && (
+                      <div className="pd-orders-section">
+                        <div className="pd-orders-section-title completed-title">
+                          ✅ Completed
+                          <span className="pd-orders-section-count">
+                            {orders.filter(o => o.status === 'delivered' || o.status === 'completed').length}
+                          </span>
+                        </div>
+                        <OrderList orders={orders.filter(o => o.status === 'delivered' || o.status === 'completed')} />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
           </>
         )}
-      </div>
+
+      </div>{/* end pd-container */}
 
       {/* ══ ADD MEDICINE MODAL ══ */}
       {showAddModal && (

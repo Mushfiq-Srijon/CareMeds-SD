@@ -1,11 +1,22 @@
 import { Link } from 'react-router-dom';
 import '../styles/Footer.css';
 
+// scroll to top helper
+function ScrollLink({ to, children }: { to: string; children: string }) {
+  return (
+    <Link
+      to={to}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export default function Footer() {
   return (
     <footer className="site-footer">
 
-      {/* ── Three columns ── */}
       <div className="footer-main">
 
         {/* Column 1: About */}
@@ -17,27 +28,26 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Column 2: Quick Links */}
+        {/* Column 2: Quick Links — scroll to top on click */}
         <div className="footer-col">
           <h4 className="footer-col-title">Quick Links</h4>
           <ul className="footer-links">
-            <li><Link to="/home">Home</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/help">Help</Link></li>
+            <li><ScrollLink to="/home">Home</ScrollLink></li>
+            <li><ScrollLink to="/about">About</ScrollLink></li>
+            <li><ScrollLink to="/help">Help</ScrollLink></li>
           </ul>
         </div>
 
-        {/* Column 3: Contact */}
+        {/* Column 3: Contact — email fixed */}
         <div className="footer-col">
           <h4 className="footer-col-title">Contact</h4>
-          <p className="footer-contact-item">📧 support@caremeds.app</p>
+          <p className="footer-contact-item">📧 caremeds65@gmail.com</p>
           <p className="footer-contact-item">📞 +880 1700-000000</p>
           <p className="footer-contact-item">📍 Dhaka, Bangladesh</p>
         </div>
 
       </div>
 
-      {/* ── Bottom bar ── */}
       <div className="footer-bottom">
         <p>© 2026 CareMeds | AUST CSE — All rights reserved.</p>
       </div>
