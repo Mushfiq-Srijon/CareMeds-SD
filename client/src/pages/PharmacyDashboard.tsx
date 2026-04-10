@@ -31,11 +31,14 @@ interface Order {
   delivery_charge: number;
   delivery_type: string;
   status: string;
+  payment_type: string;
+  payment_status: string;
   consignment_id: string | null;
   address: string;
   phone: string;
   created_at: string;
 }
+
 const emptyProfile = { pharmacy_name: '', location: '', phone: '' };
 const emptyMedicine = {
   name: '', generic_name: '', company: '',
@@ -111,7 +114,6 @@ export default function PharmacyDashboard() {
     setOrdersLoading(true);
     try {
       const res = await apiClient.get('/api/pharmacy/orders');
-      // handle both {success, orders} and plain array
       if (res.success) setOrders(res.orders);
       else if (Array.isArray(res)) setOrders(res);
       else if (res.orders) setOrders(res.orders);
@@ -262,13 +264,53 @@ export default function PharmacyDashboard() {
 
   function getStatusClass(status: string) {
     switch (status) {
-      case 'pending': return 'pd-badge pending';
+      case 'pending':   return 'pd-badge pending';
       case 'confirmed': return 'pd-badge confirmed';
-      case 'assigned': return 'pd-badge assigned';
+      case 'assigned':  return 'pd-badge assigned';
       case 'delivered': return 'pd-badge delivered';
       case 'completed': return 'pd-badge completed';
-      default: return 'pd-badge';
+      default:          return 'pd-badge';
     }
+  }
+
+  function getPaymentBadge(paymentType: string, paymentStatus: string) {
+    if (paymentType === 'cod') {
+      return (
+        <span style={{
+          background: '#fff8e1', color: '#b8860b',
+          border: '1.5px solid #f0c040',
+          borderRadius: 6, padding: '2px 10px',
+          fontSize: '0.78rem', fontWeight: 700,
+        }}>
+          💵 COD
+        </span>
+      );
+    }
+    if (paymentType === 'stripe') {
+      if (paymentStatus === 'paid') {
+        return (
+          <span style={{
+            background: '#e8f8f0', color: '#1a7f64',
+            border: '1.5px solid #27ae60',
+            borderRadius: 6, padding: '2px 10px',
+            fontSize: '0.78rem', fontWeight: 700,
+          }}>
+            ✅ Paid Online
+          </span>
+        );
+      }
+      return (
+        <span style={{
+          background: '#fdecea', color: '#c0392b',
+          border: '1.5px solid #e74c3c',
+          borderRadius: 6, padding: '2px 10px',
+          fontSize: '0.78rem', fontWeight: 700,
+        }}>
+          ❌ Payment Pending
+        </span>
+      );
+    }
+    return null;
   }
 
   // ── Order Detail View ──
@@ -282,11 +324,11 @@ export default function PharmacyDashboard() {
           <span className={getStatusClass(order.status)}>
             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
           </span>
+          {getPaymentBadge(order.payment_type, order.payment_status)}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
-          {/* ── Medicines ordered by customer ── */}
           <div className="pd-order-row">
             <span className="pd-order-label">💊 Medicines</span>
             <span className="pd-order-value" style={{ color: '#1a6fa8', fontWeight: 600 }}>
@@ -340,6 +382,12 @@ export default function PharmacyDashboard() {
             <span className="pd-order-value"
               style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0a2342' }}>
               ৳{Number(order.total_price).toFixed(2)}
+            </span>
+          </div>
+          <div className="pd-order-row">
+            <span className="pd-order-label">💳 Payment</span>
+            <span className="pd-order-value">
+              {getPaymentBadge(order.payment_type, order.payment_status)}
             </span>
           </div>
           <div className="pd-order-row">
@@ -462,7 +510,7 @@ export default function PharmacyDashboard() {
               </div>
             </div>
 
-            {/* Right: total + status + arrow */}
+            {/* Right: total + status + payment + arrow */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
               <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#0a2342' }}>
                 ৳{Number(order.total_price).toFixed(2)}
@@ -470,6 +518,7 @@ export default function PharmacyDashboard() {
               <span className={getStatusClass(order.status)}>
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </span>
+              {getPaymentBadge(order.payment_type, order.payment_status)}
               <span style={{ color: '#7f8c9a', fontSize: '1.2rem', lineHeight: 1 }}>›</span>
             </div>
           </div>

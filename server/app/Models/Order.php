@@ -1,9 +1,6 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Model;
-
 class Order extends Model
 {
     protected $fillable = [
@@ -16,22 +13,22 @@ class Order extends Model
         'recipient_name',
         'status',
         'phone',
-        'address'
+        'address',
+        'payment_type',
+        'payment_status',
+        'stripe_payment_intent_id',
     ];
 
-    // An order belongs to a user
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // An order has many order items
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    // An order belongs to a rider
     public function rider()
     {
         return $this->belongsTo(Rider::class);

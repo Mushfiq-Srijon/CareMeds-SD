@@ -36,27 +36,25 @@ class PharmacyController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'pharmacy_name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'phone' => ['required', 'regex:/^01[0-9]{9}$/'],
+            'location'      => 'required|string|max:255',
+            'phone'         => ['required', 'regex:/^01[0-9]{9}$/'],
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 422);
         }
 
         $user = $request->user();
 
-        // Check if profile already exists
         $existing = DB::selectOne(
             'SELECT id FROM pharmacies WHERE user_id = ?',
             [$user->id]
         );
 
         if ($existing) {
-            // Update existing
             DB::update(
                 'UPDATE pharmacies SET pharmacy_name = ?, location = ?, phone = ?, updated_at = NOW()
                  WHERE user_id = ?',
@@ -68,7 +66,6 @@ class PharmacyController extends Controller
                 ]
             );
         } else {
-            // Insert new
             DB::insert(
                 'INSERT INTO pharmacies (user_id, pharmacy_name, location, phone, created_at, updated_at)
                  VALUES (?, ?, ?, ?, NOW(), NOW())',
@@ -87,8 +84,8 @@ class PharmacyController extends Controller
         );
 
         return response()->json([
-            'success' => true,
-            'message' => 'Pharmacy profile saved!',
+            'success'  => true,
+            'message'  => 'Pharmacy profile saved!',
             'pharmacy' => $pharmacy
         ]);
     }
@@ -116,12 +113,12 @@ class PharmacyController extends Controller
         );
 
         return response()->json([
-            'success' => true,
+            'success'   => true,
             'medicines' => $medicines
         ]);
     }
 
-    // GET /api/pharmacy/orders  (Task 4 — adding now so route exists)
+    // GET /api/pharmacy/orders
     public function orders(Request $request)
     {
         $user = $request->user();
@@ -136,32 +133,35 @@ class PharmacyController extends Controller
         }
 
         $orders = DB::select("
-        SELECT
-            o.id, o.status, o.delivery_type, o.total_price,
-            o.delivery_charge, o.address, o.phone, o.created_at,
-            o.consignment_id,
-            u.name  as customer_name,
-            u.email as customer_email,
-            GROUP_CONCAT(
-                CONCAT(m.name, ' x', oi.quantity)
-                ORDER BY m.name
-                SEPARATOR ', '
-            ) as medicine_names
-        FROM orders o
-        JOIN users u ON o.user_id = u.id
-        LEFT JOIN order_items oi ON o.id = oi.order_id
-        LEFT JOIN medicines m ON oi.medicine_id = m.id
-        WHERE o.pharmacy_id = ?
-        GROUP BY
-            o.id, o.status, o.delivery_type, o.total_price,
-            o.delivery_charge, o.address, o.phone, o.created_at,
-            o.consignment_id, u.name, u.email
-        ORDER BY o.created_at DESC
-    ", [$pharmacy->id]);
+            SELECT
+                o.id, o.status, o.delivery_type, o.total_price,
+                o.delivery_charge, o.address, o.phone, o.created_at,
+                o.consignment_id,
+                o.payment_type,
+                o.payment_status,
+                u.name  as customer_name,
+                u.email as customer_email,
+                GROUP_CONCAT(
+                    CONCAT(m.name, ' x', oi.quantity)
+                    ORDER BY m.name
+                    SEPARATOR ', '
+                ) as medicine_names
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            LEFT JOIN medicines m ON oi.medicine_id = m.id
+            WHERE o.pharmacy_id = ?
+            GROUP BY
+                o.id, o.status, o.delivery_type, o.total_price,
+                o.delivery_charge, o.address, o.phone, o.created_at,
+                o.consignment_id, o.payment_type, o.payment_status,
+                u.name, u.email
+            ORDER BY o.created_at DESC
+        ", [$pharmacy->id]);
 
         return response()->json([
             'success' => true,
-            'orders' => $orders
+            'orders'  => $orders
         ]);
     }
 }
