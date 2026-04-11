@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: CareMeds
+        APP_ENV: ${APP_ENV}
+        APP_KEY: ${APP_KEY}
+        APP_DEBUG: ${APP_DEBUG}
+        APP_URL: ${APP_URL}
+        FRONTEND_URL: ${FRONTEND_URL}
+        LOG_LEVEL: debug
+        DB_CONNECTION: mysql
+        DB_HOST: db
+        DB_PORT: 3306
+        DB_DATABASE: caremeds_db
+        DB_USERNAME: root
+        DB_PASSWORD: ${DB_PASSWORD}
+        VITE_BACKEND_ENDPOINT: ${APP_URL}
+    container_name: caremeds_app
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+    networks:
+      - caremeds_network
+
+  db:
+    image: mysql:8.0
+    container_name: caremeds_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: caremeds_db
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - caremeds_network
+
+volumes:
+  db_data:
+
+networks:
+  caremeds_network:
+    driver: bridge
