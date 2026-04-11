@@ -1,37 +1,211 @@
-/* --- Core Layout (Do not change) --- */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── ROOT ── */
 .checkout-root {
-  background-color: #f8fafc;
   min-height: 100vh;
-  padding-bottom: 50px;
+  background: #f0f4f8;
+  font-family: 'DM Sans', sans-serif;
 }
 
-/* --- Card Spacing & Structure --- */
+/* ── LOADING / EMPTY ── */
+.checkout-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 120px 0;
+  color: #6b7f93;
+  font-size: 14px;
+}
+
+.checkout-empty {
+  text-align: center;
+  padding: 120px 0;
+  color: #8899aa;
+}
+
+.checkout-empty-icon {
+  font-size: 52px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.checkout-empty p {
+  font-size: 15px;
+  font-weight: 300;
+}
+
+/* ── HEADER ── */
+.checkout-header {
+  width: 100%;
+  background: linear-gradient(135deg, #0a2342 0%, #0d3b6e 60%, #1a5276 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 48px 0 44px;
+  box-shadow: 0 8px 40px rgba(10, 35, 66, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid transparent;
+  border-radius: 20px;
+}
+
+.checkout-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 90% at 90% 50%, rgba(52, 152, 219, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(26, 82, 118, 0.35) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.checkout-header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+.checkout-header-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.checkout-eyebrow {
+  display: inline-block;
+  background: rgba(52, 152, 219, 0.2);
+  border: 1px solid rgba(52, 152, 219, 0.4);
+  color: #7ec8e3;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.checkout-title {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.checkout-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.50);
+  font-weight: 300;
+}
+
+/* ── BODY ── */
+.checkout-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 48px 80px;
+}
+
+/* ── GRID ── */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ── CARDS ── */
 .co-card {
-  background: #ffffff;
+  background: #fff;
   border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 30px !important; /* Title ar nicher card er distance barano hoyeche */
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+  padding: 28px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.04),
+    0 12px 28px rgba(10, 35, 66, 0.09),
+    0 0 0 1px rgba(93, 173, 226, 0.06);
+  margin-bottom: 24px;
 }
 
-/* --- Header & Title Spacing --- */
+.co-card:last-child {
+  margin-bottom: 0;
+}
+
 .co-card-heading {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 25px !important; /* Heading ar inputs er majhe gap */
+  margin-bottom: 24px;
+}
+
+.co-card-icon {
+  font-size: 20px;
+  width: 40px;
+  height: 40px;
+  background: #e8f4fd;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .co-card-heading h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-family: 'Raleway', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0a2342;
   margin: 0;
 }
 
-/* --- Delivery & Payment Options Hover Effect --- */
+/* ── FORM FIELDS ── */
+.co-field {
+  margin-bottom: 18px;
+}
+
+.co-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8899aa;
+  margin-bottom: 8px;
+}
+
+.co-field input,
+.co-field textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #d5dde6;
+  background: #f8fafc;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #0a2342;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+}
+
+.co-field input:focus,
+.co-field textarea:focus {
+  border-color: #5dade2;
+  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.15);
+  background: #fff;
+}
+
+.co-field input::placeholder,
+.co-field textarea::placeholder {
+  color: #b0bec9;
+  font-weight: 300;
+}
+
+/* ── DELIVERY OPTIONS ── */
 .delivery-options {
   display: flex;
   flex-direction: column;
@@ -41,87 +215,226 @@
 .delivery-option {
   display: flex;
   align-items: center;
-  padding: 16px;
-  border: 2px solid #e2e8f0;
+  gap: 16px;
+  padding: 16px 18px;
   border-radius: 12px;
+  border: 1.5px solid #d5dde6;
   cursor: pointer;
-  background: #fff;
-  transition: all 0.3s ease; /* Hover transition */
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
-/* Mouse nile pop-up effect */
 .delivery-option:hover {
-  transform: translateY(-5px); 
-  border-color: #3498db;
-  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.12);
+  border-color: #5dade2;
+  background: #f7fafd;
 }
 
-/* Selection Highlight */
 .delivery-option.selected {
-  border-color: #3498db !important;
-  background-color: #f0f9ff !important;
-}
-
-/* --- Payment Grid (bKash, Nagad, etc.) --- */
-.payment-grid-custom {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 column layout */
-  gap: 15px;
-}
-
-/* --- Form Fields (MFS & Stripe) --- */
-.co-field {
-  margin-bottom: 20px;
-}
-
-.co-field label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: #64748b;
-}
-
-.mfs-input {
-  width: 100%;
-  padding: 12px;
-  border: 1.5px solid #d5dde6;
-  border-radius: 10px;
-  font-size: 16px;
-  transition: border-color 0.2s;
-}
-
-.mfs-input:focus {
   border-color: #3498db;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  background: #eaf4fb;
+  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.12);
 }
 
-.stripe-card-wrapper {
-  padding: 14px;
-  border: 1.5px solid #d5dde6;
-  border-radius: 10px;
-  background: #fff;
+.delivery-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #c0cdd8;
+  flex-shrink: 0;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
 }
 
-/* --- Summary Button --- */
+.delivery-option.selected .delivery-radio {
+  border-color: #3498db;
+  background: #3498db;
+  box-shadow: inset 0 0 0 3px #fff;
+}
+
+.delivery-info {
+  flex: 1;
+}
+
+.delivery-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a2342;
+  margin-bottom: 2px;
+}
+
+.delivery-sub {
+  font-size: 12px;
+  color: #8899aa;
+  font-weight: 300;
+}
+
+.delivery-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0a2342;
+}
+
+.delivery-price.free {
+  color: #1a7f64;
+}
+
+/* ── SUMMARY CARD ── */
+.co-summary {
+  position: sticky;
+  top: 24px;
+}
+
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0a2342;
+}
+
+.summary-item-qty {
+  font-size: 12px;
+  color: #8899aa;
+  font-weight: 300;
+}
+
+.summary-item-total {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a7f64;
+  white-space: nowrap;
+}
+
+.summary-divider {
+  height: 1px;
+  background: #f0f4f8;
+  margin: 16px 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: #6b7f93;
+  margin-bottom: 8px;
+}
+
+.summary-grand {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+}
+
+.summary-grand span:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #8899aa;
+}
+
+.grand-value {
+  font-family: 'Raleway', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: #0a2342;
+}
+
+.grand-value small {
+  font-size: 13px;
+  font-weight: 400;
+  color: #8899aa;
+  margin-left: 4px;
+}
+
+/* ── PLACE ORDER BUTTON ── */
 .place-order-btn {
   width: 100%;
-  padding: 16px;
-  background: #3498db;
-  color: white;
+  padding: 15px;
+  border-radius: 10px;
   border: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
+  background: linear-gradient(135deg, #0d3b6e, #1a6fa8);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .place-order-btn:hover:not(:disabled) {
-  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.2), 0 8px 24px rgba(52, 152, 219, 0.4);
 }
 
 .place-order-btn:disabled {
-  background: #cbd5e1;
+  opacity: 0.7;
   cursor: not-allowed;
+}
+
+.stripe-card-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.stripe-card-wrapper:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.stripe-note {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.stripe-usd-note {
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .co-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .checkout-header-inner {
+    padding: 0 20px;
+  }
+
+  .checkout-body {
+    padding: 24px 16px 60px;
+  }
+
+  .co-card {
+    padding: 20px 18px;
+  }
 }
