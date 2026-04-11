@@ -84,7 +84,9 @@ RUN cd client && \
 
 RUN cp -r client/dist/* public/
 
-# Expose port 80 for Apache
+# Fix Apache MPM conflict
+RUN a2dismod mpm_event mpm_worker && a2enmod mpm_prefork
+
 EXPOSE 80
 
 CMD ["apache2-foreground"]
