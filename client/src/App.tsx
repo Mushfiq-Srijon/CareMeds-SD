@@ -21,6 +21,7 @@ import './index.css';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import Invoice from './pages/Invoice';
+import AdminDashboard from './pages/AdminDashboard';
 
 function RoleRoute({ role, children }: { role: string, children: JSX.Element }) {
   const userRole = localStorage.getItem("user_role") || sessionStorage.getItem("user_role");
@@ -73,6 +74,11 @@ function App() {
 
           {/* Role Based Pages */}
           <Route path="/pharmacy" element={<RoleRoute role="pharmacy"><PharmacyDashboard /></RoleRoute>} />
+
+          {/* Admin */}
+          <Route path="/admin" element={
+            <RoleRoute role="admin"><AdminDashboard /></RoleRoute>
+          } />
         </Route>
       </Routes>
 

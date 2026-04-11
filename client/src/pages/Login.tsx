@@ -40,6 +40,7 @@ function Login() {
 
         if (data.user.role === "customer") navigate("/home");
         else if (data.user.role === "pharmacy") navigate("/pharmacy");
+        else if (data.user.role === "admin") navigate("/admin");
       } else {
         alert("Login Failed: " + (data.message || "Check credentials"));
       }

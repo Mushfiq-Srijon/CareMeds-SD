@@ -71,4 +71,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //location
     Route::get('/locations', [MedicineController::class, 'locations']);
+
+    // Admin
+    Route::get('/admin/stats', [AdminController::class, 'stats']);
+    Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::get('/admin/pharmacies', [AdminController::class, 'pharmacies']);
+    Route::get('/admin/orders', [AdminController::class, 'orders']);
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
+    Route::delete('/admin/pharmacies/{id}', [AdminController::class, 'deletePharmacy']);
 });
