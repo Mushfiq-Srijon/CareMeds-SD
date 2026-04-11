@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Medicine;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Rider;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InvoiceMail;
 
@@ -42,8 +41,6 @@ class OrderController extends Controller
 
             $totalPrice += $deliveryCharge;
 
-            $rider   = Rider::inRandomOrder()->first();
-            $riderId = $rider ? $rider->id : null;
 
             $order = Order::create([
                 'user_id'                  => Auth::id(),
@@ -51,7 +48,6 @@ class OrderController extends Controller
                 'delivery_type'            => $request->delivery_type,
                 'delivery_charge'          => $deliveryCharge,
                 'total_price'              => $totalPrice,
-                'rider_id'                 => $riderId,
                 'recipient_name'           => $request->recipient_name,
                 'phone'                    => $request->phone,
                 'address'                  => $request->address,
@@ -108,7 +104,6 @@ class OrderController extends Controller
             return response()->json([
                 'message'        => 'Order placed successfully',
                 'order_id'       => $order->id,
-                'rider_assigned' => $riderId,
             ]);
         });
     }

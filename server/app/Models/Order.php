@@ -9,7 +9,6 @@ class Order extends Model
         'delivery_type',
         'delivery_charge',
         'total_price',
-        'rider_id',
         'recipient_name',
         'status',
         'phone',
@@ -29,8 +28,4 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function rider()
-    {
-        return $this->belongsTo(Rider::class);
-    }
 }

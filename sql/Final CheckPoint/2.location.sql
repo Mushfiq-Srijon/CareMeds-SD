@@ -1,0 +1,4 @@
+ALTER TABLE pharmacies 
+  ADD COLUMN division VARCHAR(100) NULL AFTER location,
+  ADD COLUMN city VARCHAR(100) NULL AFTER division,
+  ADD COLUMN area VARCHAR(255) NULL AFTER city;

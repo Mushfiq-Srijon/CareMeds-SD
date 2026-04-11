@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import ApiClient from '../api';
 import { toast } from 'react-hot-toast';
 import '../styles/PharmacyDashboard.css';
+import { BD_DIVISIONS } from '../data/divisions';
 
 const apiClient = new ApiClient();
 
 interface Pharmacy {
   id: number;
   pharmacy_name: string;
+  division: string;
+  city: string;
+  area: string;
   location: string;
   phone: string;
 }
@@ -39,7 +43,7 @@ interface Order {
   created_at: string;
 }
 
-const emptyProfile  = { pharmacy_name: '', location: '', phone: '' };
+const emptyProfile = { pharmacy_name: '', division: '', city: '', area: '', phone: '' };
 const emptyMedicine = {
   name: '', generic_name: '', company: '',
   category: '', stock: '', price: ''
@@ -51,26 +55,26 @@ export default function PharmacyDashboard() {
 
   const [tab, setTab] = useState<'medicines' | 'orders'>('medicines');
 
-  const [pharmacy, setPharmacy]             = useState<Pharmacy | null>(null);
+  const [pharmacy, setPharmacy] = useState<Pharmacy | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm]       = useState(emptyProfile);
-  const [profileSaving, setProfileSaving]   = useState(false);
-  const [phoneTouched, setPhoneTouched]     = useState(false);
+  const [profileForm, setProfileForm] = useState(emptyProfile);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
 
-  const [medicines, setMedicines]       = useState<Medicine[]>([]);
-  const [medLoading, setMedLoading]     = useState(false);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [medLoading, setMedLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addForm, setAddForm]           = useState(emptyMedicine);
-  const [addSaving, setAddSaving]       = useState(false);
-  const [editMed, setEditMed]           = useState<Medicine | null>(null);
-  const [editForm, setEditForm]         = useState({ stock: '', price: '' });
-  const [editSaving, setEditSaving]     = useState(false);
+  const [addForm, setAddForm] = useState(emptyMedicine);
+  const [addSaving, setAddSaving] = useState(false);
+  const [editMed, setEditMed] = useState<Medicine | null>(null);
+  const [editForm, setEditForm] = useState({ stock: '', price: '' });
+  const [editSaving, setEditSaving] = useState(false);
 
-  const [orders, setOrders]                   = useState<Order[]>([]);
-  const [ordersLoading, setOrdersLoading]     = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
-  const [selectedOrder, setSelectedOrder]     = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -261,12 +265,12 @@ export default function PharmacyDashboard() {
 
   function getStatusClass(status: string) {
     switch (status) {
-      case 'pending':   return 'pd-badge pending';
+      case 'pending': return 'pd-badge pending';
       case 'confirmed': return 'pd-badge confirmed';
-      case 'assigned':  return 'pd-badge assigned';
+      case 'assigned': return 'pd-badge assigned';
       case 'delivered': return 'pd-badge delivered';
       case 'completed': return 'pd-badge completed';
-      default:          return 'pd-badge';
+      default: return 'pd-badge';
     }
   }
 
@@ -330,19 +334,19 @@ export default function PharmacyDashboard() {
             <span className="pd-order-value" style={{ color: '#1a6fa8', fontWeight: 600 }}>
               {order.medicine_names
                 ? order.medicine_names.split(',').map((name, i) => (
-                    <span key={i} style={{
-                      display: 'inline-block',
-                      background: '#eaf4fb',
-                      color: '#0d3b6e',
-                      borderRadius: 6,
-                      padding: '2px 10px',
-                      margin: '2px 4px 2px 0',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                    }}>
-                      {name.trim()}
-                    </span>
-                  ))
+                  <span key={i} style={{
+                    display: 'inline-block',
+                    background: '#eaf4fb',
+                    color: '#0d3b6e',
+                    borderRadius: 6,
+                    padding: '2px 10px',
+                    margin: '2px 4px 2px 0',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                  }}>
+                    {name.trim()}
+                  </span>
+                ))
                 : '—'}
             </span>
           </div>
@@ -533,6 +537,7 @@ export default function PharmacyDashboard() {
           <div className="pd-card">
             <h2>{pharmacy ? 'Edit Profile' : '📋 Set Up Your Pharmacy Profile'}</h2>
             <form className="pd-form single-col" onSubmit={handleProfileSubmit}>
+
               <div className="pd-form-group">
                 <label>Pharmacy Name</label>
                 <input
@@ -542,15 +547,42 @@ export default function PharmacyDashboard() {
                   required
                 />
               </div>
+
               <div className="pd-form-group">
-                <label>Location / Address</label>
+                <label>Division</label>
+                <select
+                  value={profileForm.division}
+                  onChange={e => setProfileForm({ ...profileForm, division: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid #d5dde6', fontSize: '14px', color: '#0a2342', outline: 'none' }}
+                >
+                  <option value="">Select Division</option>
+                  {BD_DIVISIONS.map(div => (
+                    <option key={div} value={div}>{div}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="pd-form-group">
+                <label>City / District</label>
                 <input
-                  type="text" placeholder="e.g. 45 Main Road, Dhaka"
-                  value={profileForm.location}
-                  onChange={e => setProfileForm({ ...profileForm, location: e.target.value })}
+                  type="text" placeholder="e.g. Mirpur, Dhaka"
+                  value={profileForm.city}
+                  onChange={e => setProfileForm({ ...profileForm, city: e.target.value })}
                   required
                 />
               </div>
+
+              <div className="pd-form-group">
+                <label>Area & Address</label>
+                <input
+                  type="text" placeholder="e.g. House 12, Road 4, Mirpur-10"
+                  value={profileForm.area}
+                  onChange={e => setProfileForm({ ...profileForm, area: e.target.value })}
+                  required
+                />
+              </div>
+
               <div className="pd-form-group">
                 <label>Phone Number</label>
                 <input
@@ -562,14 +594,8 @@ export default function PharmacyDashboard() {
                   className={phoneError ? 'input-error' : ''}
                   required
                 />
-                {phoneError && (
-                  <span className="pd-field-error">
-                    Must start with 01 and be exactly 11 digits
-                  </span>
-                )}
-                {phoneTouched && isValidPhone(profileForm.phone) && (
-                  <span className="pd-field-success">✓ Valid phone number</span>
-                )}
+                {phoneError && <span className="pd-field-error">Must start with 01 and be exactly 11 digits</span>}
+                {phoneTouched && isValidPhone(profileForm.phone) && <span className="pd-field-success">✓ Valid</span>}
                 <span className="pd-field-hint">{profileForm.phone.length}/11 digits</span>
               </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
@@ -592,7 +618,9 @@ export default function PharmacyDashboard() {
               <button className="pd-edit-btn" onClick={() => {
                 setProfileForm({
                   pharmacy_name: pharmacy.pharmacy_name,
-                  location: pharmacy.location,
+                  division: pharmacy.division,
+                  city: pharmacy.city,
+                  area: pharmacy.area,
                   phone: pharmacy.phone,
                 });
                 setPhoneTouched(false);
@@ -603,8 +631,16 @@ export default function PharmacyDashboard() {
             </div>
             <div className="pd-profile-grid">
               <div className="pd-profile-item">
-                <label>Location</label>
-                <span>{pharmacy.location}</span>
+                <label>Division</label>
+                <span>{pharmacy.division}</span>
+              </div>
+              <div className="pd-profile-item">
+                <label>City</label>
+                <span>{pharmacy.city}</span>
+              </div>
+              <div className="pd-profile-item">
+                <label>Area & Address</label>
+                <span>{pharmacy.area}</span>
               </div>
               <div className="pd-profile-item">
                 <label>Phone</label>
