@@ -125,6 +125,31 @@ class ApiClient {
     });
   }
 
+  // ─── Admin ────────────────────────────────────────────
+  async getAdminStats() {
+    return this.get('/api/admin/stats');
+  }
+
+  async getAdminUsers(search = '', role = '', page = 1) {
+    return this.get(`/api/admin/users?search=${encodeURIComponent(search)}&role=${role}&page=${page}`);
+  }
+
+  async getAdminPharmacies(search = '', page = 1) {
+    return this.get(`/api/admin/pharmacies?search=${encodeURIComponent(search)}&page=${page}`);
+  }
+
+  async getAdminOrders(search = '', status = '', page = 1) {
+    return this.get(`/api/admin/orders?search=${encodeURIComponent(search)}&status=${status}&page=${page}`);
+  }
+
+  async deleteAdminUser(id: number) {
+    return this.delete(`/api/admin/users/${id}`);
+  }
+
+  async deleteAdminPharmacy(id: number) {
+    return this.delete(`/api/admin/pharmacies/${id}`);
+  }
+
   // ─── Orders ───────────────────────────────────────────────────
   // Get logged-in customer's orders (Oni)
   async getMyOrders() {

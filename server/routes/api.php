@@ -12,6 +12,7 @@ use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PharmacyController;
 use App\Http\Controllers\SteadfastController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AdminController;
 
 // ── Public Routes ─────────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
