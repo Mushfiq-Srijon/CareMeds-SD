@@ -12,6 +12,7 @@ use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\PharmacyController;
 use App\Http\Controllers\SteadfastController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AdminController;
 
 // ── Public Routes ─────────────────────────────────────
 Route::post('/register', [AuthController::class, 'register']);
@@ -67,4 +68,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Stripe
     Route::post('/payment/create-intent', [PaymentController::class, 'createIntent']);
+
+    //location
+    Route::get('/locations', [MedicineController::class, 'locations']);
+
+    // Admin
+    Route::get('/admin/stats', [AdminController::class, 'stats']);
+    Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::get('/admin/pharmacies', [AdminController::class, 'pharmacies']);
+    Route::get('/admin/orders', [AdminController::class, 'orders']);
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
+    Route::delete('/admin/pharmacies/{id}', [AdminController::class, 'deletePharmacy']);
 });

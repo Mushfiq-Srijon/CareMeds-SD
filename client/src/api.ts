@@ -65,8 +65,14 @@ class ApiClient {
   }
 
   // ─── Medicines ───────────────────────────────────────────────
-  async getMedicines(search = '', page = 1, perPage = 12) {
-    return this.get(`/api/medicines?search=${encodeURIComponent(search)}&page=${page}&per_page=${perPage}`);
+  async getMedicines(search = '', page = 1, perPage = 12, location = '') {
+    return this.get(
+      `/api/medicines?search=${encodeURIComponent(search)}&page=${page}&per_page=${perPage}&location=${encodeURIComponent(location)}`
+    );
+  }
+
+  async getLocations() {
+    return this.get('/api/locations');
   }
 
   // Get single medicine with pharmacy info (Oni)
@@ -117,6 +123,31 @@ class ApiClient {
       current_password: currentPassword,
       new_password: newPassword
     });
+  }
+
+  // ─── Admin ────────────────────────────────────────────
+  async getAdminStats() {
+    return this.get('/api/admin/stats');
+  }
+
+  async getAdminUsers(search = '', role = '', page = 1) {
+    return this.get(`/api/admin/users?search=${encodeURIComponent(search)}&role=${role}&page=${page}`);
+  }
+
+  async getAdminPharmacies(search = '', page = 1) {
+    return this.get(`/api/admin/pharmacies?search=${encodeURIComponent(search)}&page=${page}`);
+  }
+
+  async getAdminOrders(search = '', status = '', page = 1) {
+    return this.get(`/api/admin/orders?search=${encodeURIComponent(search)}&status=${status}&page=${page}`);
+  }
+
+  async deleteAdminUser(id: number) {
+    return this.delete(`/api/admin/users/${id}`);
+  }
+
+  async deleteAdminPharmacy(id: number) {
+    return this.delete(`/api/admin/pharmacies/${id}`);
   }
 
   // ─── Orders ───────────────────────────────────────────────────

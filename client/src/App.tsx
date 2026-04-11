@@ -2,7 +2,6 @@ import { Outlet, Route, Routes, Navigate } from 'react-router-dom';
 import BaseLayout from './views/BaseLayout';
 import Home from './views/Home';
 import PharmacyDashboard from './pages/PharmacyDashboard';
-import RiderPanel from './pages/RiderPanel';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -22,6 +21,7 @@ import './index.css';
 import { Toaster } from 'react-hot-toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import Invoice from './pages/Invoice';
+import AdminDashboard from './pages/AdminDashboard';
 
 function RoleRoute({ role, children }: { role: string, children: JSX.Element }) {
   const userRole = localStorage.getItem("user_role") || sessionStorage.getItem("user_role");
@@ -74,7 +74,11 @@ function App() {
 
           {/* Role Based Pages */}
           <Route path="/pharmacy" element={<RoleRoute role="pharmacy"><PharmacyDashboard /></RoleRoute>} />
-          <Route path="/rider" element={<RoleRoute role="rider"><RiderPanel /></RoleRoute>} />
+
+          {/* Admin */}
+          <Route path="/admin" element={
+            <RoleRoute role="admin"><AdminDashboard /></RoleRoute>
+          } />
         </Route>
       </Routes>
 

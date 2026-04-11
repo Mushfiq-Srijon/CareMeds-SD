@@ -19,12 +19,12 @@ export default function Navigation() {
   const allNavItems = [
     { path: '/home',      label: 'Home',        roles: ['customer'] },
     { path: '/cart',      label: 'Cart',        roles: ['customer'] },
-    { path: '/my-orders', label: 'My Orders',   roles: ['customer'] }, // ← THIS WAS MISSING
+    { path: '/my-orders', label: 'My Orders',   roles: ['customer'] }, 
     { path: '/pharmacy',  label: 'Dashboard',   roles: ['pharmacy'] },
-    { path: '/rider',     label: 'My Orders',   roles: ['rider'] },
-    { path: '/about',     label: 'About',       roles: ['customer', 'pharmacy', 'rider'] },
-    { path: '/help',      label: 'Help',        roles: ['customer', 'pharmacy', 'rider'] },
-    { path: '/profile',   label: 'User Profile',roles: ['customer', 'pharmacy', 'rider'] },
+    { path: '/about',     label: 'About',       roles: ['customer', 'pharmacy',] },
+    { path: '/help',      label: 'Help',        roles: ['customer', 'pharmacy',] },
+    { path: '/profile',   label: 'User Profile',roles: ['customer', 'pharmacy',] },
+    { path: '/admin', label: 'Admin Panel', roles: ['admin'] },
   ];
 
   const navItems = allNavItems.filter(item => item.roles.includes(role));
