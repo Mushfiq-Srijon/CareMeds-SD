@@ -9,77 +9,86 @@
 }
 
 /* ── HERO ── */
+/* ── Updated HERO Section ── */
 .hero {
   width: 100%;
-  min-height: 78vh;
-  background: linear-gradient(135deg, #0a2342 0%, #0d3b6e 45%, #1a5276 100%);
+  min-height: 80vh; /* Ektu height baralam layout balance korte */
+  background: #0a2342; /* Fallback */
+  background: radial-gradient(circle at 0% 0%, #0d3b6e 0%, #0a2342 100%);
   position: relative;
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  border: 2px solid transparent;
-  border-radius: 20px;
+  border-radius: 0 0 50px 50px; /* Bottom corners subtle curve */
 }
 
+/* Abstract Minimalist Background Shapes */
 .hero::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 60% 80% at 80% 50%, rgba(52,152,219,0.18) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(26,82,118,0.4) 0%, transparent 60%);
+  top: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(93, 173, 226, 0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
   pointer-events: none;
 }
 
 .hero::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
-  background-size: 32px 32px;
+  bottom: -15%;
+  left: -5%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(52, 152, 219, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(50px);
   pointer-events: none;
 }
 
+/* Subtle Animated Grid Layer (Optional for premium feel) */
 .hero-inner {
   position: relative;
   z-index: 1;
   width: 100%;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 60px 72px;
+  align-items: center; /* Vertical alignment center korlam */
+  justify-content: space-between; /* Eita bame ar dane push korbe contents */
+  padding: 60px 80px;
   gap: 40px;
 }
 
-/* LEFT – tagline + buttons */
-.hero-left {
+.hero-right {
+  text-align: right; /* Lekha dane rakhbe */
+  max-width: 600px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  align-self: stretch;
-  padding-bottom: 4px;
-  max-width: 340px;
+  align-items: flex-end; /* Shob contents-ke dane bhashiye dibe */
 }
 
-.hero-tagline {
-  font-size: 25px;
-  line-height: 1.7;
-  color: rgba(255,255,255,0.65);
-  font-weight: 300;
-  border-left: 2px solid #5dade2;
-  padding-left: 14px;
-}
-
+/* Clean UI Restoration Fix */
 .hero-tagline strong {
   display: block;
   white-space: nowrap;
-  color: #fff;
-  font-weight: 600;
-  font-size: 25px;
-  margin-bottom: 2px;
+  color: #ffffff; /* Ekdom pure white */
+  font-weight: 800; /* Font weight baraye 800 korlam jate beshi garo lage */
+  font-size: 28px; /* Size-o ektu baralam highlight korar jonno */
+  margin-bottom: 5px;
+  text-shadow: 0 2px 15px rgba(93, 173, 226, 0.4); /* Subtle blue glow */
 }
 
+.hero-tagline {
+  font-size: 18px; /* Nicher choto lekha-tao ektu boro korlam */
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85); /* Eitau arektu garo korlam */
+  font-weight: 400;
+  border-left: 4px solid #5dade2; /* Border-ta arektu bold korlam */
+  padding-left: 18px;
+}
 .btn-row {
   display: flex;
   gap: 12px;

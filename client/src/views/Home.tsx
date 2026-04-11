@@ -15,21 +15,24 @@ interface Medicine {
   category: string;
   stock: number;
   price: number;
+  pharmacy_name: string; 
+  location: string;
 }
 
 export default function Home() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
-  const [search, setSearch]       = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [page, setPage]           = useState(1);
-  const [total, setTotal]         = useState(0);
-  const perPage                   = 12;
-  const navigate                  = useNavigate();
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const perPage = 12;
+  const navigate = useNavigate();
 
   const fetchMedicines = useCallback(async (searchVal: string, pageVal: number) => {
     setLoading(true);
     try {
       const res = await apiClient.getMedicines(searchVal, pageVal, perPage);
+      // Backend data structure check kore medicines set kora
       setMedicines(res.data ?? []);
       setTotal(res.total ?? 0);
     } catch {
@@ -38,7 +41,6 @@ export default function Home() {
     setLoading(false);
   }, []);
 
-  // Debounce search — waits 400ms after user stops typing
   useEffect(() => {
     const timer = setTimeout(() => {
       setPage(1);
@@ -47,7 +49,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Fetch on page change
   useEffect(() => {
     fetchMedicines(search, page);
   }, [page]);
@@ -66,8 +67,7 @@ export default function Home() {
 
   return (
     <div className="home-root">
-
-      {/* HEADER */}
+      {/* HEADER - No Changes */}
       <div className="home-header">
         <div className="home-header-inner">
           <div className="home-title-group">
@@ -91,9 +91,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* BODY */}
       <div className="home-body">
-
         {loading && (
           <div className="home-loading">
             <Spinner animation="border" />
@@ -127,14 +125,24 @@ export default function Home() {
               <div className="med-card-body">
                 <h3 className="med-name">{m.name}</h3>
                 <p className="med-generic">{m.generic_name}</p>
+                
                 <div className="med-meta">
+                  {/* Task 4: Same UI, but with safety check */}
+                  <div className="med-meta-row">
+                    <span className="meta-label">Pharmacy</span>
+                    <span className="meta-value">{m.pharmacy_name || 'Insaf'}</span>
+                  </div>
+                  <div className="med-meta-row">
+                    <span className="meta-label">Location</span>
+                    <span className="meta-value">{m.location || 'Love road, Dhaka'}</span>
+                  </div>
                   <div className="med-meta-row">
                     <span className="meta-label">Company</span>
                     <span className="meta-value">{m.company}</span>
                   </div>
                   <div className="med-meta-row">
                     <span className="meta-label">Price</span>
-                    <span className="meta-value price">{m.price} BDT</span>
+                    <span className="meta-value price">৳{Number(m.price).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -183,7 +191,6 @@ export default function Home() {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );
