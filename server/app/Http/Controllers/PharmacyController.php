@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class PharmacyController extends Controller
 {
@@ -26,7 +26,7 @@ class PharmacyController extends Controller
         }
 
         return response()->json([
-            'success' => true,
+            'success'  => true,
             'pharmacy' => $pharmacy
         ]);
     }
@@ -34,20 +34,18 @@ class PharmacyController extends Controller
     // POST /api/pharmacy/setup
     public function setup(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'pharmacy_name' => 'required|string|max:255',
-            'location'      => 'required|string|max:255',
-            'phone'         => ['required', 'regex:/^01[0-9]{9}$/'],
+            'division'      => 'required|string|max:100',
+            'city'          => 'required|string|max:100',
+            'area'          => 'required|string|max:255',
+            'phone'         => 'required|string|max:20',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors()
-            ], 422);
-        }
-
         $user = $request->user();
+
+        // Combine into single searchable location string
+        $location = $request->division . ', ' . $request->city . ', ' . $request->area;
 
         $existing = DB::selectOne(
             'SELECT id FROM pharmacies WHERE user_id = ?',
@@ -56,28 +54,34 @@ class PharmacyController extends Controller
 
         if ($existing) {
             DB::update(
-                'UPDATE pharmacies SET pharmacy_name = ?, location = ?, phone = ?, updated_at = NOW()
-                 WHERE user_id = ?',
+                'UPDATE pharmacies SET pharmacy_name=?, division=?, city=?, area=?, location=?, phone=?, updated_at=NOW() WHERE user_id=?',
                 [
                     $request->pharmacy_name,
-                    $request->location,
+                    $request->division,
+                    $request->city,
+                    $request->area,
+                    $location,
                     $request->phone,
                     $user->id
                 ]
             );
         } else {
             DB::insert(
-                'INSERT INTO pharmacies (user_id, pharmacy_name, location, phone, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, NOW(), NOW())',
+                'INSERT INTO pharmacies (user_id, pharmacy_name, division, city, area, location, phone, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())',
                 [
                     $user->id,
                     $request->pharmacy_name,
-                    $request->location,
+                    $request->division,
+                    $request->city,
+                    $request->area,
+                    $location,
                     $request->phone
                 ]
             );
         }
 
+        // Fetch and return the updated record
         $pharmacy = DB::selectOne(
             'SELECT * FROM pharmacies WHERE user_id = ?',
             [$user->id]
@@ -85,8 +89,8 @@ class PharmacyController extends Controller
 
         return response()->json([
             'success'  => true,
-            'message'  => 'Pharmacy profile saved!',
-            'pharmacy' => $pharmacy
+            'message'  => 'Pharmacy profile saved.',
+            'pharmacy' => $pharmacy,
         ]);
     }
 
@@ -129,16 +133,17 @@ class PharmacyController extends Controller
         );
 
         if (!$pharmacy) {
-            return response()->json(['success' => false, 'message' => 'No pharmacy profile found.'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'No pharmacy profile found.'
+            ], 404);
         }
 
         $orders = DB::select("
             SELECT
                 o.id, o.status, o.delivery_type, o.total_price,
                 o.delivery_charge, o.address, o.phone, o.created_at,
-                o.consignment_id,
-                o.payment_type,
-                o.payment_status,
+                o.consignment_id, o.payment_type, o.payment_status,
                 u.name  as customer_name,
                 u.email as customer_email,
                 GROUP_CONCAT(
