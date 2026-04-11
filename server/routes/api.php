@@ -67,4 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Stripe
     Route::post('/payment/create-intent', [PaymentController::class, 'createIntent']);
+
+    //location
+    Route::get('/locations', [MedicineController::class, 'locations']);
 });

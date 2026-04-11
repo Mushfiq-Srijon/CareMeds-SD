@@ -12,25 +12,33 @@ class MedicineController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search', '');
+        $location = $request->query('location', '');
         $page = max(1, (int) $request->query('page', 1));
         $perPage = (int) $request->query('per_page', 12);
         $offset = ($page - 1) * $perPage;
         $like = '%' . $search . '%';
+        $locLike = '%' . $location . '%';
 
         $medicines = DB::select(
-            'SELECT * FROM medicines
-         WHERE pharmacy_id IS NOT NULL
-           AND (name LIKE ? OR generic_name LIKE ?)
-         ORDER BY id ASC
+            'SELECT m.*, p.pharmacy_name, p.location as pharmacy_location
+         FROM medicines m
+         JOIN pharmacies p ON m.pharmacy_id = p.id
+         WHERE m.pharmacy_id IS NOT NULL
+           AND (m.name LIKE ? OR m.generic_name LIKE ?)
+           AND (? = "" OR p.location LIKE ?)
+         ORDER BY m.id ASC
          LIMIT ? OFFSET ?',
-            [$like, $like, $perPage, $offset]
+            [$like, $like, $location, $locLike, $perPage, $offset]
         );
 
         $totalRow = DB::selectOne(
-            'SELECT COUNT(*) as total FROM medicines
-         WHERE pharmacy_id IS NOT NULL
-           AND (name LIKE ? OR generic_name LIKE ?)',
-            [$like, $like]
+            'SELECT COUNT(*) as total
+         FROM medicines m
+         JOIN pharmacies p ON m.pharmacy_id = p.id
+         WHERE m.pharmacy_id IS NOT NULL
+           AND (m.name LIKE ? OR m.generic_name LIKE ?)
+           AND (? = "" OR p.location LIKE ?)',
+            [$like, $like, $location, $locLike]
         );
 
         return response()->json([
@@ -166,6 +174,15 @@ class MedicineController extends Controller
             'success' => true,
             'message' => 'Medicine updated successfully!'
         ]);
+    }
+
+    //location filter
+    public function locations()
+    {
+        $locations = DB::select(
+            'SELECT DISTINCT location FROM pharmacies ORDER BY location ASC'
+        );
+        return response()->json($locations);
     }
 
     // DELETE /api/medicines/{id}

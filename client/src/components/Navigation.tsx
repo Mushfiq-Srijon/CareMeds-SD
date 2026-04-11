@@ -21,7 +21,6 @@ export default function Navigation() {
     { path: '/cart',      label: 'Cart',        roles: ['customer'] },
     { path: '/my-orders', label: 'My Orders',   roles: ['customer'] }, // ← THIS WAS MISSING
     { path: '/pharmacy',  label: 'Dashboard',   roles: ['pharmacy'] },
-    { path: '/rider',     label: 'My Orders',   roles: ['rider'] },
     { path: '/about',     label: 'About',       roles: ['customer', 'pharmacy', 'rider'] },
     { path: '/help',      label: 'Help',        roles: ['customer', 'pharmacy', 'rider'] },
     { path: '/profile',   label: 'User Profile',roles: ['customer', 'pharmacy', 'rider'] },
