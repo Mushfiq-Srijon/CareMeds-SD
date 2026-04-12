@@ -187,14 +187,14 @@ export default function MyOrders() {
                   {order.consignment_id && (
                     <div className="order-tracking">
                       <span className="label">🚚 Tracking ID</span>
-                      
+                      <a
                         className="tracking-link"
                         href={`https://steadfast.com.bd/t/${order.consignment_id}`}
                         target="_blank"
                         rel="noreferrer"
-                      
+                      >
                         {order.consignment_id}
-                    
+                      </a>
                     </div>
                   )}
                 </div>
