@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Footer wrapper ── */
+.site-footer {
+  background: #0a2342;
+  color: rgba(255,255,255,0.8);
+  font-family: 'DM Sans', sans-serif;
+  margin-top: auto;
+}
+
+/* ── Three-column main area ── */
+.footer-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 64px 48px;
+}
+
+/* ── Logo ── */
+.footer-logo {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 14px;
+  letter-spacing: -0.5px;
+}
+
+.footer-logo span {
+  color: #5dade2;
+}
+
+/* ── About text ── */
+.footer-about {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.55);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ── Column headings ── */
+.footer-col-title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Quick Links ── */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links li a {
+  color: #5dade2;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 300;
+  transition: color 0.2s;
+}
+
+.footer-links li a:hover {
+  color: #fff;
+}
+
+/* ── Contact ── */
+.footer-contact-item {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.55);
+  margin: 0 0 10px;
+  font-weight: 300;
+}
+
+/* ── Bottom bar ── */
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+  padding: 16px 40px;
+}
+
+.footer-bottom p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.35);
+  font-weight: 300;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .footer-main {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 24px 32px;
+  }
+}

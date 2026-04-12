@@ -6,6 +6,9 @@ export default function Navigation() {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Task 6: check both storages
+  const role = localStorage.getItem("user_role") || sessionStorage.getItem("user_role") || "";
+
   // Hide navbar on landing page
   if (location.pathname === '/') {
     return null;
@@ -13,23 +16,29 @@ export default function Navigation() {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const navItems = [
-    { path: '/home', label: 'Home' },
-    { path: '/about', label: 'About' },
-    { path: '/help', label: 'Help' },
-    { path: '/cart', label: 'Cart' },
-    { path: '/profile', label: 'User Profile' },
+  const allNavItems = [
+    { path: '/home',      label: 'Home',        roles: ['customer'] },
+    { path: '/cart',      label: 'Cart',        roles: ['customer'] },
+    { path: '/my-orders', label: 'My Orders',   roles: ['customer'] }, 
+    { path: '/pharmacy',  label: 'Dashboard',   roles: ['pharmacy'] },
+    { path: '/about',     label: 'About',       roles: ['customer', 'pharmacy',] },
+    { path: '/help',      label: 'Help',        roles: ['customer', 'pharmacy',] },
+    { path: '/profile',   label: 'User Profile',roles: ['customer', 'pharmacy',] },
+    { path: '/admin', label: 'Admin Panel', roles: ['admin'] },
   ];
+
+  const navItems = allNavItems.filter(item => item.roles.includes(role));
 
   return (
     <nav className="custom-navbar">
       <div className="custom-navbar-container">
-        {/* Website Name */}
+
+        {/* Brand */}
         <Link to="/home" className="custom-navbar-brand">
-          CareMeds
+          Care<span>Meds</span>
         </Link>
 
-        {/* Hamburger Menu for Mobile */}
+        {/* Hamburger */}
         <button
           className="custom-navbar-toggler"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -40,7 +49,7 @@ export default function Navigation() {
           <span className="custom-navbar-toggler-icon"></span>
         </button>
 
-        {/* Navigation Links */}
+        {/* Links */}
         <div className={`custom-navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           {navItems.map((item) => (
             <Link
@@ -53,6 +62,7 @@ export default function Navigation() {
             </Link>
           ))}
         </div>
+
       </div>
     </nav>
   );

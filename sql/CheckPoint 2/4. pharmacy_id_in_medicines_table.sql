@@ -1,0 +1,1 @@
+ALTER TABLE medicines ADD COLUMN pharmacy_id BIGINT UNSIGNED NULL AFTER id;
