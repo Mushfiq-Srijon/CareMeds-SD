@@ -1,3 +1,3 @@
 export const secrets = {
-  backendEndpoint: import.meta.env.VITE_BACKEND_ENDPOINT as string
+  backendEndpoint: import.meta.env.VITE_BACKEND_ENDPOINT || 'https://caremeds-sd-production.up.railway.app'
 };
