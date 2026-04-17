@@ -20,10 +20,15 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://caremeds-murex.vercel.app'
+        'https://caremeds-murex.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:3000',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://caremeds.*\.vercel\.app$#',
+        '#^https://.*mushfiq-srijons-projects\.vercel\.app$#',
+    ],
 
     'allowed_headers' => ['*'],
 
