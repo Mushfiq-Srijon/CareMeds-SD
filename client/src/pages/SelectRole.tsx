@@ -74,7 +74,7 @@ function SelectRole() {
 
         {/* Role Selection Buttons */}
         <div style={styles.roleGroup}>
-          {["customer", "pharmacy", "rider"].map((r) => (
+          {["customer", "pharmacy"].map((r) => (
             <button
               key={r}
               onClick={() => setRole(r)}

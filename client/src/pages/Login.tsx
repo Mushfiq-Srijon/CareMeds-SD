@@ -54,7 +54,7 @@ function Login() {
   // Handles Google OAuth login
   const handleGoogleLogin = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/login`);
+      const res = await fetch(`${API_BASE}/api/auth/google`);
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
