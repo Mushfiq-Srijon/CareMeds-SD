@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import API_BASE from "../config/api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ function Login() {
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
+      const response = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -53,7 +54,7 @@ function Login() {
   // Handles Google OAuth login
   const handleGoogleLogin = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/google");
+      const res = await fetch(`${API_BASE}/api/login`);
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import API_BASE from "../config/api";
 
 function Register() {
   const [name, setName]                     = useState("");
@@ -18,7 +19,7 @@ function Register() {
     if (password !== confirmPassword) { alert("Passwords do not match"); return; }
 
     try {
-      const response = await fetch("http://localhost:8000/api/register", {
+      const response = await fetch(`${API_BASE}/api/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role }),
@@ -38,7 +39,7 @@ function Register() {
 
   const handleGoogleLogin = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/auth/google");
+      const res = await fetch(`${API_BASE}/api/auth/google`);
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;

@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import API_BASE from "../config/api";
 
 // This page is shown to NEW Google users who have no role yet.
 // The URL contains ?token=... (a temporary token).
@@ -33,7 +34,7 @@ function SelectRole() {
     try {
       // Line 30: Send the chosen role to the backend
       // We use the temp token in the Authorization header
-      const response = await fetch("http://localhost:8000/api/auth/google/set-role", {
+      const response = await fetch(`${API_BASE}/api/auth/google/set-role`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
