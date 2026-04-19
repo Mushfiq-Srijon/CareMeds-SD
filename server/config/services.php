@@ -43,9 +43,13 @@ return [
     ],
 
     'stripe' => [
-    'key'     => env('STRIPE_KEY'),
-    'secret'  => env('STRIPE_SECRET'),
-    'webhook' => env('STRIPE_WEBHOOK_SECRET'),
-],
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'resend' => [
+        'api_key' => env('re_BAVwXnGS_AMDvrkinuf2qGo65CeTLwzrq'),
+    ],
 
 ];
