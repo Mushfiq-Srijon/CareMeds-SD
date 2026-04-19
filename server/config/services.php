@@ -49,7 +49,7 @@ return [
     ],
 
     'resend' => [
-        'api_key' => env('re_BAVwXnGS_AMDvrkinuf2qGo65CeTLwzrq'),
+        'api_key' => env('RESEND_API_KEY'),
     ],
 
 ];

@@ -16,10 +16,10 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'pharmacy_id'              => 'required',
-            'delivery_type'            => 'required|in:home_delivery,pickup',
-            'items'                    => 'required|array',
-            'payment_type'             => 'required|in:stripe,cod',
+            'pharmacy_id' => 'required',
+            'delivery_type' => 'required|in:home_delivery,pickup',
+            'items' => 'required|array',
+            'payment_type' => 'required|in:stripe,cod',
             'stripe_payment_intent_id' => 'nullable|string',
         ]);
 
@@ -41,28 +41,27 @@ class OrderController extends Controller
 
             $totalPrice += $deliveryCharge;
 
-
             $order = Order::create([
-                'user_id'                  => Auth::id(),
-                'pharmacy_id'              => $request->pharmacy_id,
-                'delivery_type'            => $request->delivery_type,
-                'delivery_charge'          => $deliveryCharge,
-                'total_price'              => $totalPrice,
-                'recipient_name'           => $request->recipient_name,
-                'phone'                    => $request->phone,
-                'address'                  => $request->address,
-                'payment_type'             => $request->payment_type,
-                'payment_status'           => $request->payment_type === 'stripe' ? 'paid' : 'pending',
+                'user_id' => Auth::id(),
+                'pharmacy_id' => $request->pharmacy_id,
+                'delivery_type' => $request->delivery_type,
+                'delivery_charge' => $deliveryCharge,
+                'total_price' => $totalPrice,
+                'recipient_name' => $request->recipient_name,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'payment_type' => $request->payment_type,
+                'payment_status' => $request->payment_type === 'stripe' ? 'paid' : 'pending',
                 'stripe_payment_intent_id' => $request->stripe_payment_intent_id,
             ]);
 
             foreach ($request->items as $item) {
                 $medicine = Medicine::find($item['medicine_id']);
                 OrderItem::create([
-                    'order_id'    => $order->id,
+                    'order_id' => $order->id,
                     'medicine_id' => $item['medicine_id'],
-                    'quantity'    => $item['quantity'],
-                    'price'       => $medicine->price,
+                    'quantity' => $item['quantity'],
+                    'price' => $medicine->price,
                 ]);
                 $medicine->decrement('stock', $item['quantity']);
             }
@@ -83,32 +82,89 @@ class OrderController extends Controller
 
             // Build order object for invoice
             $orderForInvoice = (object) [
-                'id'            => $order->id,
+                'id' => $order->id,
                 'customer_name' => $request->recipient_name ?? $customer->name,
-                'phone'         => $order->phone,
-                'address'       => $order->address,
+                'phone' => $order->phone,
+                'address' => $order->address,
                 'delivery_type' => $order->delivery_type,
                 'delivery_charge' => $order->delivery_charge,
-                'total_price'   => $order->total_price,
-                'payment_type'  => $order->payment_type,
-                'created_at'    => $order->created_at,
+                'total_price' => $order->total_price,
+                'payment_type' => $order->payment_type,
+                'created_at' => $order->created_at,
             ];
+
+            // Build invoice HTML for email
+            $itemRows = '';
+            foreach ($invoiceItems as $item) {
+                $itemRows .= '<tr>
+                    <td style="padding:8px;border-bottom:1px solid #eee;">' . $item->name . '</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:center;">' . $item->quantity . '</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">' . $item->price . ' BDT</td>
+                    <td style="padding:8px;border-bottom:1px solid #eee;text-align:right;">' . ($item->price * $item->quantity) . ' BDT</td>
+                </tr>';
+            }
+
+            $invoiceHtml = '
+                <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:30px;border:1px solid #eee;border-radius:10px;">
+                    <div style="background:#0a2342;padding:20px;border-radius:8px 8px 0 0;">
+                        <h1 style="color:#fff;margin:0;font-size:24px;">CareMeds</h1>
+                        <p style="color:#7ec8e3;margin:4px 0 0;">Medicine Delivery Platform</p>
+                    </div>
+                    <div style="padding:24px;">
+                        <h2 style="color:#0a2342;">Invoice #' . $order->id . '</h2>
+                        <p><strong>Name:</strong> ' . $orderForInvoice->customer_name . '</p>
+                        <p><strong>Phone:</strong> ' . $order->phone . '</p>
+                        <p><strong>Address:</strong> ' . $order->address . '</p>
+                        <p><strong>Delivery:</strong> ' . ($order->delivery_type === 'home_delivery' ? 'Home Delivery' : 'Self Pickup') . '</p>
+                        <table style="width:100%;border-collapse:collapse;margin-top:16px;">
+                            <thead>
+                                <tr style="background:#0a2342;color:#fff;">
+                                    <th style="padding:10px;text-align:left;">Medicine</th>
+                                    <th style="padding:10px;text-align:center;">Qty</th>
+                                    <th style="padding:10px;text-align:right;">Price</th>
+                                    <th style="padding:10px;text-align:right;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>' . $itemRows . '</tbody>
+                        </table>
+                        <div style="text-align:right;margin-top:16px;">
+                            <p>Delivery Charge: ' . $deliveryCharge . ' BDT</p>
+                            <p style="font-size:18px;font-weight:bold;color:#0a2342;">Grand Total: ' . $totalPrice . ' BDT</p>
+                        </div>
+                        <p style="margin-top:24px;color:#888;font-size:13px;">Thank you for using CareMeds. Get well soon!</p>
+                    </div>
+                </div>
+            ';
 
             // Send invoice email
             try {
-                Mail::to($customer->email)->send(new InvoiceMail($orderForInvoice, $invoiceItems));
+                $resendKey = config('services.resend.api_key');
+
+                if ($resendKey) {
+                    // Production: use Resend HTTP API
+                    $client = \Resend::client($resendKey);
+                    $client->emails->send([
+                        'from' => 'CareMeds <onboarding@resend.dev>',
+                        'to' => [$customer->email],
+                        'subject' => 'Your CareMeds Invoice #' . $order->id,
+                        'html' => $invoiceHtml,
+                    ]);
+                } else {
+                    // Local development: use Laravel Mail with SMTP
+                    Mail::to($customer->email)->send(new InvoiceMail($orderForInvoice, $invoiceItems));
+                }
             } catch (\Exception $e) {
                 \Log::error('Invoice mail failed: ' . $e->getMessage());
             }
 
             return response()->json([
-                'message'        => 'Order placed successfully',
-                'order_id'       => $order->id,
+                'message' => 'Order placed successfully',
+                'order_id' => $order->id,
             ]);
         });
     }
 
-    // Task 3: Customer's own orders
+    // Customer's own orders
     public function myOrders(Request $request)
     {
         $user = $request->user();
@@ -162,6 +218,7 @@ class OrderController extends Controller
             SELECT
                 o.id, o.status, o.delivery_type, o.total_price,
                 o.delivery_charge, o.address, o.phone, o.created_at,
+                o.consignment_id,
                 u.name  as customer_name,
                 u.email as customer_email,
                 GROUP_CONCAT(
@@ -176,7 +233,7 @@ class OrderController extends Controller
             GROUP BY
                 o.id, o.status, o.delivery_type, o.total_price,
                 o.delivery_charge, o.address, o.phone, o.created_at,
-                u.name, u.email
+                o.consignment_id, u.name, u.email
             ORDER BY o.created_at DESC
         ", [$pharmacy->id]);
 
