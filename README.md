@@ -468,10 +468,10 @@ npm run build
 
 | Name | Role |
 |---|---|
-| MD. Mushfiqur Rahman | Team Lead and Backend Developer |
-| MD. Mahedi Hasan Oni | Frontend Developer |
+| MD. Mushfiqur Rahman | Backend & Frontend Developer |
+| Sabikun Alam | Backend & Frontend Developer |
 | Maimuna Momtaj Emu | Frontend Developer |
-| Sabikun Alam | Backend Developer |
+| MD. Mahedi Hasan Oni | Frontend Developer |
 
 ## Project Status
 
